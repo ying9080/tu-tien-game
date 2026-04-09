@@ -2,215 +2,118 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tu Tiên Simulator v11.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nội Soi Thiên Đạo v3.0</title>
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        /* Chỉ số trên đầu */
-        header { background: #111; padding: 15px; border-bottom: 2px solid #ffcc00; flex-shrink: 0; }
-        .level { font-size: 20px; font-weight: bold; color: #ffcc00; text-align: center; margin-bottom: 10px; }
-        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; }
-        .bar-bg { width: 100%; height: 10px; background: #333; border-radius: 5px; margin-top: 5px; overflow: hidden; }
-        .bar-fill { height: 100%; width: 0%; transition: width 0.3s; }
-
-        /* Menu */
-        nav { display: flex; background: #1a1a1a; flex-shrink: 0; }
-        .menu-btn { flex: 1; padding: 15px 0; border: none; background: none; color: #666; font-weight: bold; font-size: 12px; border-bottom: 2px solid transparent; }
-        .menu-btn.active { color: #ffcc00; border-bottom: 2px solid #ffcc00; background: #222; }
-
-        /* Nội dung */
-        main { flex-grow: 1; padding: 15px; overflow-y: auto; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .card { background: #1a1a1a; padding: 20px; border-radius: 12px; border: 1px solid #333; text-align: center; margin-bottom: 15px; }
-        
-        /* Nút bấm lớn */
-        .btn { width: 100%; padding: 20px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer; display: block; }
-        .btn-white { background: #fff; color: #000; }
-        .btn-blue { background: #00d2ff; color: #fff; }
-        .btn-gold { background: #ffcc00; color: #000; }
-        .btn:active { opacity: 0.7; transform: scale(0.98); }
-
-        /* Nhật ký */
-        #log { background: #000; border: 1px solid #222; padding: 10px; border-radius: 8px; height: 180px; overflow-y: auto; font-family: monospace; font-size: 12px; color: #aaa; text-align: left; }
-        .item-row { background: #222; padding: 10px; border-radius: 5px; margin-bottom: 5px; display: flex; justify-content: space-between; border: 1px solid #333; }
+        body { background: #0a0a0a; color: #00ff00; font-family: 'Courier New', monospace; padding: 20px; line-height: 1.4; }
+        .input-box { background: #1a1a1a; border: 1px solid #333; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; background: #000; color: #00ff00; border: 1px solid #00ff00; margin-bottom: 10px; }
+        button { width: 100%; padding: 15px; background: #00ff00; color: #000; font-weight: bold; border: none; cursor: pointer; }
+        #console { background: #000; border: 1px solid #333; padding: 15px; height: 400px; overflow-y: auto; font-size: 12px; border-radius: 5px; }
+        .error { color: #ff4444; }
+        .success { color: #ffff00; font-weight: bold; background: #1a3a1a; padding: 5px; }
+        .info { color: #00d2ff; }
+        .final-code { background: #222; color: #fff; padding: 15px; margin-top: 20px; border-left: 5px solid #ffff00; display: none; }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="level" id="ui-level">Phàm Cốt Tầng 1</div>
-    <div class="stats">
-        <div>Máu: <span id="ui-hp-txt">100/100</span>
-            <div class="bar-bg"><div id="ui-hp-bar" class="bar-fill" style="background: #ff4d4d; width: 100%;"></div></div>
-        </div>
-        <div>Linh Lực: <span id="ui-exp-txt">0/100</span>
-            <div class="bar-bg"><div id="ui-exp-bar" class="bar-fill" style="background: #00d2ff; width: 0%;"></div></div>
-        </div>
-    </div>
-    <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 10px; color: #888;">
-        <span>⚔️ Công: <b id="ui-atk" style="color:#ffcc00">10</b></span>
-        <span>🛡️ Thủ: <b id="ui-def" style="color:#00d2ff">5</b></span>
-        <span>💰 Tiền: <b id="ui-gold" style="color:#ffcc00">0</b></span>
-    </div>
-</header>
-
-<nav>
-    <button class="menu-btn active" onclick="changeTab('tab-tu', this)">TU LUYỆN</button>
-    <button class="menu-btn" onclick="changeTab('tab-di', this)">THÁM HIỂM</button>
-    <button class="menu-btn" onclick="changeTab('tab-kho', this)">TÚI ĐỒ</button>
-    <button class="menu-btn" onclick="changeTab('tab-settings', this)">CÀI ĐẶT</button>
-</nav>
-
-<main>
-    <div id="tab-tu" class="tab-content active">
-        <div class="card">
-            <h3 style="margin: 0 0 10px 0;">Động Phủ Bế Quan</h3>
-            <button id="btn-train" class="btn btn-white" onclick="doAction('train')">🧘 VẬN CÔNG TU LUYỆN</button>
-            <button id="btn-break" class="btn btn-gold" style="display:none" onclick="doAction('break')">🔥 ĐỘT PHÁ CẢNH GIỚI</button>
-        </div>
+    <h2>🔍 NỘI SOI THIÊN ĐẠO V3.0</h2>
+    
+    <div class="input-box">
+        <label>Nhập API Key (Linh thạch):</label>
+        <input type="text" id="apiKey" placeholder="AIzaSy...">
+        <button onclick="batDauNoiSoi()">BẮT ĐẦU NỘI SOI TOÀN DIỆN</button>
     </div>
 
-    <div id="tab-di" class="tab-content">
-        <div class="card">
-            <h3 style="margin: 0 0 10px 0; color: #00d2ff;">Vạn Yêu Sơn</h3>
-            <button class="btn btn-blue" onclick="callHeaven()" id="btn-explore">🚶 XUẤT THẾ THÁM HIỂM</button>
-        </div>
-    </div>
+    <div id="console">--- Chờ mệnh lệnh... ---</div>
 
-    <div id="tab-kho" class="tab-content">
-        <div class="card">
-            <h3 style="margin: 0 0 10px 0; color: #2ecc71;">Túi Trữ Vật</h3>
-            <div id="ui-inventory">Trống rỗng...</div>
-        </div>
+    <div id="finalCode" class="final-code">
+        <h3>✅ KẾT QUẢ: DÒNG CODE CHIẾN THẮNG</h3>
+        <p>Hãy copy dòng này dán vào hàm fetch trong game của bạn:</p>
+        <code id="codeSnippet"></code>
     </div>
-
-    <div id="tab-settings" class="tab-content">
-        <div class="card" style="text-align: left;">
-            <h3 style="margin: 0 0 10px 0; color: #ff4d4d;">Cài Đặt API</h3>
-            <input type="password" id="input-api" style="width:100%; padding:15px; background:#000; color:#fff; border:1px solid #444; border-radius:8px;" placeholder="Dán mã API vào đây...">
-            <button class="btn btn-gold" onclick="saveKey()">💾 LƯU MÃ API</button>
-            <button class="btn" style="background:#444; color:#fff; margin-top:20px;" onclick="resetGame()">♻️ CHƠI LẠI TỪ ĐẦU</button>
-        </div>
-    </div>
-
-    <div id="log">
-        <div>> Thiên Đạo V11.0 sẵn sàng. Chào đạo hữu Ying!</div>
-    </div>
-</main>
 
 <script>
-    // Khởi tạo dữ liệu
-    let p = JSON.parse(localStorage.getItem('tu_tien_save')) || {
-        lv: 0, 
-        lvs: ["Phàm Cốt Tầng 1", "Phàm Cốt Tầng 5", "Phàm Cốt Tầng 9", "Luyện Khí Kỳ", "Trúc Cơ Kỳ"],
-        hp: 100, mHp: 100, exp: 0, mExp: 100, gold: 0, atk: 10, def: 5, inv: []
-    };
-
-    function saveGame() {
-        localStorage.setItem('tu_tien_save', JSON.stringify(p));
+    const logBox = document.getElementById('console');
+    
+    function log(msg, type = '') {
+        const div = document.createElement('div');
+        div.className = type;
+        div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        logBox.appendChild(div);
+        logBox.scrollTop = logBox.scrollHeight;
     }
 
-    function addLog(m) {
-        const d = document.getElementById('log');
-        d.innerHTML = `<div>> ${m}</div>` + d.innerHTML;
-    }
-
-    function changeTab(id, btn) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.menu-btn').forEach(n => n.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        btn.classList.add('active');
-    }
-
-    function updateUI() {
-        document.getElementById('ui-level').innerText = p.lvs[p.lv];
-        document.getElementById('ui-hp-txt').innerText = `${p.hp}/${p.mHp}`;
-        document.getElementById('ui-hp-bar').style.width = (p.hp/p.mHp)*100 + "%";
-        document.getElementById('ui-exp-txt').innerText = `${p.exp}/${p.mExp}`;
-        document.getElementById('ui-exp-bar').style.width = (p.exp/p.mExp)*100 + "%";
-        document.getElementById('ui-gold').innerText = p.gold;
-        document.getElementById('ui-atk').innerText = p.atk;
-        document.getElementById('ui-def').innerText = p.def;
-
-        document.getElementById('btn-train').style.display = p.exp >= p.mExp ? 'none' : 'block';
-        document.getElementById('btn-break').style.display = p.exp >= p.mExp ? 'block' : 'none';
-
-        const invDiv = document.getElementById('ui-inventory');
-        invDiv.innerHTML = p.inv.length ? p.inv.map(i => `<div class="item-row"><b>${i.n}</b> <span>${i.s}</span></div>`).join('') : "Trống rỗng...";
-        saveGame();
-    }
-
-    function doAction(type) {
-        if(type == 'train') {
-            p.exp += 25; 
-            addLog("Tọa thiền vận công, linh lực tăng tiến.");
-        }
-        if(type == 'break') {
-            if(Math.random() > 0.4) {
-                p.lv++; p.exp = 0; p.mExp += 50; p.atk += 10;
-                addLog("<b style='color:#ffcc00'>ĐỘT PHÁ THÀNH CÔNG!</b>");
-            } else {
-                p.hp -= 20; if(p.hp < 0) p.hp = 10;
-                addLog("<span style='color:#ff4d4d'>Đột phá thất bại, thương thế trầm trọng!</span>");
-            }
-        }
-        updateUI();
-    }
-
-    async function callHeaven() {
-        const key = localStorage.getItem('tu_tien_api_key');
-        if(!key) return addLog("Lỗi: Hãy vào tab Cài Đặt dán API Key!");
+    async function batDauNoiSoi() {
+        const key = document.getElementById('apiKey').value.trim();
+        if(!key) return alert("Chưa nhập Key!");
         
-        const btn = document.getElementById('btn-explore');
-        btn.disabled = true; btn.innerText = "ĐANG KẾT NỐI...";
-
-        let r = Math.random();
-        let mode = r < 0.3 ? "XAU" : (r < 0.8 ? "BT" : "TOT");
-        let query = `Viết 1 câu tu tiên 8 chữ: ${mode=="XAU"?"bị quái thú cắn":"nhặt được linh thạch"}`;
-
+        logBox.innerHTML = "";
+        log("Bắt đầu nội soi thực thi mệnh lệnh...", "info");
+        
+        // Bước 1: Liệt kê tất cả model mà Key này có quyền truy cập
+        log("Bước 1: Truy vấn danh sách Model từ Google Cloud...");
+        let availableModels = [];
         try {
-            // SỬA MODEL CHUẨN TRONG HÌNH: gemini-2.5-flash
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ contents: [{ parts: [{ text: query }] }] })
-            });
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
             const data = await res.json();
             if(data.error) throw new Error(data.error.message);
-
-            let txt = data.candidates[0].content.parts[0].text.trim();
-            if(mode=="XAU") { p.hp -= 15; if(p.hp < 0) p.hp = 0; addLog(`🔴 ${txt} (-15 Máu)`); }
-            else if(mode=="BT") { p.gold += 40; addLog(`🟡 ${txt} (+40 Vàng)`); }
-            else { p.inv.push({n:"Linh Kiếm", s:"+5 Công"}); p.atk += 5; addLog(`🟣 ${txt} (Nhận đồ)`); }
+            
+            availableModels = data.models
+                .filter(m => m.supportedGenerationMethods.includes("generateContent"))
+                .map(m => m.name.replace("models/", ""));
+            
+            log(`Tìm thấy ${availableModels.length} model khả dụng.`, "success");
         } catch(e) {
-            addLog(`<span style='color:orange'>Thiên đạo nghẽn: ${e.message.substring(0,20)}...</span>`);
-            p.gold += 5; addLog("Bản năng giúp nhặt được 5 đồng lẻ.");
+            log(`THẤT BẠI BƯỚC 1: ${e.message}`, "error");
+            return;
         }
-        btn.disabled = false; btn.innerText = "🚶 XUẤT THẾ THÁM HIỂM";
-        updateUI();
-    }
 
-    function saveKey() {
-        const val = document.getElementById('input-api').value.trim();
-        localStorage.setItem('tu_tien_api_key', val);
-        addLog("<span style='color:#00d2ff'>Đã nạp Linh Thạch (API)!</span>");
-    }
+        // Bước 2: Test từng model một với bài toán "Viết cốt truyện"
+        log("Bước 2: Kiểm tra khả năng viết cốt truyện (Thử từng Model)...", "info");
+        
+        // Ưu tiên các model mạnh trước
+        const priorityModels = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-pro"];
+        const testList = [...new Set([...priorityModels, ...availableModels])];
 
-    function resetGame() {
-        if(confirm("Xóa hết dữ liệu tu luyện để chơi lại từ đầu?")) {
-            localStorage.removeItem('tu_tien_save');
-            location.reload();
+        for (let mName of testList) {
+            log(`Đang thử Model: <b>${mName}</b>...`);
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${mName}:generateContent?key=${key}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: "Viết 1 câu ngắn về tu tiên gặp kỳ ngộ." }] }]
+                    })
+                });
+
+                const result = await response.json();
+
+                if(result.error) {
+                    log(`-> Từ chối: ${result.error.status} - ${result.error.message.substring(0,50)}...`, "error");
+                    continue;
+                }
+
+                if(result.candidates && result.candidates[0].content) {
+                    const story = result.candidates[0].content.parts[0].text;
+                    log(`=> THÀNH CÔNG! AI viết: "${story}"`, "success");
+                    
+                    // Hiện kết quả cuối cùng
+                    document.getElementById('finalCode').style.display = "block";
+                    document.getElementById('codeSnippet').innerText = 
+                        `fetch("https://generativelanguage.googleapis.com/v1beta/models/${mName}:generateContent?key=\${key}", ... )`;
+                    
+                    log("--- NỘI SOI KẾT THÚC: ĐÃ TÌM THẤY ĐƯỜNG TRUYỀN CHUẨN ---", "success");
+                    return;
+                }
+            } catch(e) {
+                log(`-> Lỗi kết nối: ${e.message}`, "error");
+            }
         }
-    }
 
-    window.onload = () => {
-        const k = localStorage.getItem('tu_tien_api_key');
-        if(k) document.getElementById('input-api').value = k;
-        updateUI();
-    };
+        log("TẤT CẢ MODEL ĐỀU THẤT BẠI. Có thể do khu vực (Region) bị chặn hoặc Key chưa kích hoạt Billing.", "error");
+    }
 </script>
 </body>
 </html>

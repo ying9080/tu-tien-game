@@ -3,86 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tu Tiên Simulator v10.0</title>
+    <title>Tu Tiên Simulator v11.0</title>
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        :root { --vang: #ffcc00; --den: #0d0d0d; --xam: #1a1a1c; --do: #ff4d4d; --xanh: #00d2ff; --chu: #e0e0e0; }
-        body { margin: 0; background: var(--den); color: var(--chu); font-family: sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
-        .header { background: #000; padding: 12px; border-bottom: 2px solid var(--vang); flex-shrink: 0; }
-        .cap-do { font-size: 18px; font-weight: bold; color: var(--vang); text-shadow: 0 0 5px rgba(255,204,0,0.5); margin-bottom: 5px; text-align: center; }
-        .grid-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px; }
-        .thanh-nen { width: 100%; height: 8px; background: #333; border-radius: 4px; overflow: hidden; margin-top: 2px; border: 1px solid #444; }
-        .thanh-chay { height: 100%; transition: 0.4s; }
-        .menu { display: flex; background: #111; border-bottom: 1px solid #222; }
-        .nut-menu { flex: 1; padding: 15px 0; border: none; background: none; color: #666; font-size: 11px; font-weight: bold; }
-        .nut-menu.active { color: var(--vang); border-bottom: 3px solid var(--vang); background: #1a1a1a; }
-        .vung-choi { flex-grow: 1; padding: 15px; overflow-y: auto; }
-        .tab { display: none; } .tab.active { display: block; }
-        .khung { background: var(--xam); padding: 20px; border-radius: 12px; border: 1px solid #333; text-align: center; margin-bottom: 15px; }
-        .nut-bam { width: 100%; padding: 16px; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; margin-top: 10px; color: #000; cursor: pointer; }
-        .nut-bam:active { transform: scale(0.95); opacity: 0.8; }
-        .nut-tu { background: #fff; } .nut-di { background: var(--xanh); color: #fff; } .nut-vang { background: var(--vang); }
-        .nhat-ky { background: #000; border: 1px solid #222; padding: 12px; border-radius: 8px; height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; color: #888; text-align: left; line-height: 1.5; }
-        .o-do { background: #222; padding: 10px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; font-size: 12px; border: 1px solid #333; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* Chỉ số trên đầu */
+        header { background: #111; padding: 15px; border-bottom: 2px solid #ffcc00; flex-shrink: 0; }
+        .level { font-size: 20px; font-weight: bold; color: #ffcc00; text-align: center; margin-bottom: 10px; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; }
+        .bar-bg { width: 100%; height: 10px; background: #333; border-radius: 5px; margin-top: 5px; overflow: hidden; }
+        .bar-fill { height: 100%; width: 0%; transition: width 0.3s; }
+
+        /* Menu */
+        nav { display: flex; background: #1a1a1a; flex-shrink: 0; }
+        .menu-btn { flex: 1; padding: 15px 0; border: none; background: none; color: #666; font-weight: bold; font-size: 12px; border-bottom: 2px solid transparent; }
+        .menu-btn.active { color: #ffcc00; border-bottom: 2px solid #ffcc00; background: #222; }
+
+        /* Nội dung */
+        main { flex-grow: 1; padding: 15px; overflow-y: auto; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .card { background: #1a1a1a; padding: 20px; border-radius: 12px; border: 1px solid #333; text-align: center; margin-bottom: 15px; }
+        
+        /* Nút bấm lớn */
+        .btn { width: 100%; padding: 20px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer; display: block; }
+        .btn-white { background: #fff; color: #000; }
+        .btn-blue { background: #00d2ff; color: #fff; }
+        .btn-gold { background: #ffcc00; color: #000; }
+        .btn:active { opacity: 0.7; transform: scale(0.98); }
+
+        /* Nhật ký */
+        #log { background: #000; border: 1px solid #222; padding: 10px; border-radius: 8px; height: 180px; overflow-y: auto; font-family: monospace; font-size: 12px; color: #aaa; text-align: left; }
+        .item-row { background: #222; padding: 10px; border-radius: 5px; margin-bottom: 5px; display: flex; justify-content: space-between; border: 1px solid #333; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div class="cap-do" id="txt-cap">Phàm Cốt Tầng 1</div>
-    <div class="grid-stats">
-        <div>❤️ Máu: <span id="txt-hp">100/100</span>
-            <div class="thanh-nen"><div id="bar-hp" class="thanh-chay" style="width:100%; background:var(--do)"></div></div>
+<header>
+    <div class="level" id="ui-level">Phàm Cốt Tầng 1</div>
+    <div class="stats">
+        <div>Máu: <span id="ui-hp-txt">100/100</span>
+            <div class="bar-bg"><div id="ui-hp-bar" class="bar-fill" style="background: #ff4d4d; width: 100%;"></div></div>
         </div>
-        <div>⚡ Linh Lực: <span id="txt-exp">0/100</span>
-            <div class="thanh-nen"><div id="bar-exp" class="thanh-chay" style="width:0%; background:var(--xanh)"></div></div>
-        </div>
-        <div style="grid-column: 1 / -1; display:flex; justify-content:space-between; margin-top:5px; color:#aaa; font-size:10px; border-top:1px solid #222; padding-top:5px;">
-            <span>⚔️ Công: <b id="txt-atk" style="color:var(--vang)">10</b> | 🛡️ Thủ: <b id="txt-def" style="color:var(--xanh)">5</b> | 💰 Tiền: <b id="txt-gold" style="color:var(--vang)">0</b></span>
+        <div>Linh Lực: <span id="ui-exp-txt">0/100</span>
+            <div class="bar-bg"><div id="ui-exp-bar" class="bar-fill" style="background: #00d2ff; width: 0%;"></div></div>
         </div>
     </div>
-</div>
+    <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 10px; color: #888;">
+        <span>⚔️ Công: <b id="ui-atk" style="color:#ffcc00">10</b></span>
+        <span>🛡️ Thủ: <b id="ui-def" style="color:#00d2ff">5</b></span>
+        <span>💰 Tiền: <b id="ui-gold" style="color:#ffcc00">0</b></span>
+    </div>
+</header>
 
-<div class="menu">
-    <button class="nut-menu active" onclick="tab('tab-tu', this)">TU LUYỆN</button>
-    <button class="nut-menu" onclick="tab('tab-di', this)">THÁM HIỂM</button>
-    <button class="nut-menu" onclick="tab('tab-kho', this)">TÚI ĐỒ</button>
-    <button class="nut-menu" onclick="tab('tab-api', this)">CÀI ĐẶT</button>
-</div>
+<nav>
+    <button class="menu-btn active" onclick="changeTab('tab-tu', this)">TU LUYỆN</button>
+    <button class="menu-btn" onclick="changeTab('tab-di', this)">THÁM HIỂM</button>
+    <button class="menu-btn" onclick="changeTab('tab-kho', this)">TÚI ĐỒ</button>
+    <button class="menu-btn" onclick="changeTab('tab-settings', this)">CÀI ĐẶT</button>
+</nav>
 
-<div class="vung-choi">
-    <div id="tab-tu" class="tab active"><div class="khung"><h3 style="color:var(--vang); margin:0 0 10px 0;">Động Phủ Tĩnh Tọa</h3><button id="btn-tu" class="nut-bam nut-tu" onclick="choi('tu')">🧘 VẬN CÔNG TU LUYỆN</button><button id="btn-pha" class="nut-bam nut-vang" style="display:none" onclick="choi('pha')">🔥 ĐỘT PHÁ CẢNH GIỚI</button></div></div>
-    <div id="tab-di" class="tab"><div class="khung"><h3 style="color:var(--xanh); margin:0 0 10px 0;">Vạn Yêu Sơn</h3><button class="nut-bam nut-di" onclick="goAI()" id="btn-go">🚶 XUẤT THẾ THÁM HIỂM</button></div></div>
-    <div id="tab-kho" class="tab"><div class="khung"><h3 style="color:#2ecc71; margin:0 0 10px 0;">Túi Trữ Vật</h3><div id="list-do" style="text-align:left;">Trống rỗng...</div></div></div>
-    <div id="tab-api" class="tab"><div class="khung" style="text-align:left;"><h3 style="color:var(--do); margin:0 0 10px 0;">Cài Đặt API</h3><input type="password" id="api-key" style="width:100%; padding:14px; background:#000; color:#fff; border:1px solid #444; border-radius:8px;" placeholder="Dán mã API vào đây..."><button class="nut-bam nut-vang" onclick="save()">💾 LƯU MÃ API</button></div></div>
-    <div class="nhat-ky" id="log"><div>> Thiên Đạo Đỉnh Phong khởi chạy. Chào Ying!</div></div>
-</div>
+<main>
+    <div id="tab-tu" class="tab-content active">
+        <div class="card">
+            <h3 style="margin: 0 0 10px 0;">Động Phủ Bế Quan</h3>
+            <button id="btn-train" class="btn btn-white" onclick="doAction('train')">🧘 VẬN CÔNG TU LUYỆN</button>
+            <button id="btn-break" class="btn btn-gold" style="display:none" onclick="doAction('break')">🔥 ĐỘT PHÁ CẢNH GIỚI</button>
+        </div>
+    </div>
+
+    <div id="tab-di" class="tab-content">
+        <div class="card">
+            <h3 style="margin: 0 0 10px 0; color: #00d2ff;">Vạn Yêu Sơn</h3>
+            <button class="btn btn-blue" onclick="callHeaven()" id="btn-explore">🚶 XUẤT THẾ THÁM HIỂM</button>
+        </div>
+    </div>
+
+    <div id="tab-kho" class="tab-content">
+        <div class="card">
+            <h3 style="margin: 0 0 10px 0; color: #2ecc71;">Túi Trữ Vật</h3>
+            <div id="ui-inventory">Trống rỗng...</div>
+        </div>
+    </div>
+
+    <div id="tab-settings" class="tab-content">
+        <div class="card" style="text-align: left;">
+            <h3 style="margin: 0 0 10px 0; color: #ff4d4d;">Cài Đặt API</h3>
+            <input type="password" id="input-api" style="width:100%; padding:15px; background:#000; color:#fff; border:1px solid #444; border-radius:8px;" placeholder="Dán mã API vào đây...">
+            <button class="btn btn-gold" onclick="saveKey()">💾 LƯU MÃ API</button>
+            <button class="btn" style="background:#444; color:#fff; margin-top:20px;" onclick="resetGame()">♻️ CHƠI LẠI TỪ ĐẦU</button>
+        </div>
+    </div>
+
+    <div id="log">
+        <div>> Thiên Đạo V11.0 sẵn sàng. Chào đạo hữu Ying!</div>
+    </div>
+</main>
 
 <script>
-    let p = { lv: 0, lvs: ["Phàm Cốt 1", "Phàm Cốt 5", "Phàm Cốt 9", "Luyện Khí", "Trúc Cơ"], hp: 100, mHp: 100, exp: 0, mExp: 100, gold: 0, atk: 10, def: 5, inv: [] };
-    function log(m) { const d = document.getElementById('log'); d.innerHTML = `<div>> ${m}</div>` + d.innerHTML; }
-    function tab(id, b) { document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); document.querySelectorAll('.nut-menu').forEach(n => n.classList.remove('active')); document.getElementById(id).classList.add('active'); b.classList.add('active'); }
-    function save() { localStorage.setItem('api_key_final', document.getElementById('api-key').value.trim()); log("<span style='color:var(--xanh)'>Đã nạp linh thạch thành công!</span>"); }
-    function ui() {
-        document.getElementById('txt-cap').innerText = p.lvs[p.lv]; document.getElementById('txt-hp').innerText = `${p.hp}/${p.mHp}`;
-        document.getElementById('bar-hp').style.width = (p.hp/p.mHp)*100 + "%"; document.getElementById('txt-exp').innerText = `${p.exp}/${p.mExp}`;
-        document.getElementById('bar-exp').style.width = (p.exp/p.mExp)*100 + "%"; document.getElementById('txt-gold').innerText = p.gold;
-        document.getElementById('txt-atk').innerText = p.atk; document.getElementById('txt-def').innerText = p.def;
-        document.getElementById('btn-tu').style.display = p.exp >= p.mExp ? 'none' : 'block'; document.getElementById('btn-pha').style.display = p.exp >= p.mExp ? 'block' : 'none';
-        const list = document.getElementById('list-do'); list.innerHTML = p.inv.length ? p.inv.map(i => `<div class="o-do"><b>${i.n}</b> <span>${i.s}</span></div>`).join('') : "Trống rỗng...";
+    // Khởi tạo dữ liệu
+    let p = JSON.parse(localStorage.getItem('tu_tien_save')) || {
+        lv: 0, 
+        lvs: ["Phàm Cốt Tầng 1", "Phàm Cốt Tầng 5", "Phàm Cốt Tầng 9", "Luyện Khí Kỳ", "Trúc Cơ Kỳ"],
+        hp: 100, mHp: 100, exp: 0, mExp: 100, gold: 0, atk: 10, def: 5, inv: []
+    };
+
+    function saveGame() {
+        localStorage.setItem('tu_tien_save', JSON.stringify(p));
     }
-    function choi(t) {
-        if(t=='tu') { p.exp += 25; log("Tọa thiền hấp thu linh khí."); }
-        if(t=='pha') { if(Math.random() > 0.4) { p.lv++; p.exp=0; p.mExp+=50; p.atk+=10; log("<b style='color:var(--vang)'>ĐỘT PHÁ THÀNH CÔNG!</b>"); } else { p.hp -= 20; log("<span style='color:var(--do)'>Đột phá thất bại!</span>"); } }
-        ui();
+
+    function addLog(m) {
+        const d = document.getElementById('log');
+        d.innerHTML = `<div>> ${m}</div>` + d.innerHTML;
     }
-    async function goAI() {
-        const key = localStorage.getItem('api_key_final');
-        if(!key) return log("Lỗi: Qua tab Cài Đặt dán Key!");
-        const btn = document.getElementById('btn-go'); btn.disabled = true; btn.innerText = "ĐANG KẾT NỐI...";
-        let r = Math.random(); let loai = r < 0.3 ? "XAU" : (r < 0.8 ? "BT" : "TOT");
-        let q = `Viết 1 câu tu tiên 8 chữ: ${loai=="XAU"?"bị quái đánh":"nhặt linh thạch"}`;
+
+    function changeTab(id, btn) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.menu-btn').forEach(n => n.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    function updateUI() {
+        document.getElementById('ui-level').innerText = p.lvs[p.lv];
+        document.getElementById('ui-hp-txt').innerText = `${p.hp}/${p.mHp}`;
+        document.getElementById('ui-hp-bar').style.width = (p.hp/p.mHp)*100 + "%";
+        document.getElementById('ui-exp-txt').innerText = `${p.exp}/${p.mExp}`;
+        document.getElementById('ui-exp-bar').style.width = (p.exp/p.mExp)*100 + "%";
+        document.getElementById('ui-gold').innerText = p.gold;
+        document.getElementById('ui-atk').innerText = p.atk;
+        document.getElementById('ui-def').innerText = p.def;
+
+        document.getElementById('btn-train').style.display = p.exp >= p.mExp ? 'none' : 'block';
+        document.getElementById('btn-break').style.display = p.exp >= p.mExp ? 'block' : 'none';
+
+        const invDiv = document.getElementById('ui-inventory');
+        invDiv.innerHTML = p.inv.length ? p.inv.map(i => `<div class="item-row"><b>${i.n}</b> <span>${i.s}</span></div>`).join('') : "Trống rỗng...";
+        saveGame();
+    }
+
+    function doAction(type) {
+        if(type == 'train') {
+            p.exp += 25; 
+            addLog("Tọa thiền vận công, linh lực tăng tiến.");
+        }
+        if(type == 'break') {
+            if(Math.random() > 0.4) {
+                p.lv++; p.exp = 0; p.mExp += 50; p.atk += 10;
+                addLog("<b style='color:#ffcc00'>ĐỘT PHÁ THÀNH CÔNG!</b>");
+            } else {
+                p.hp -= 20; if(p.hp < 0) p.hp = 10;
+                addLog("<span style='color:#ff4d4d'>Đột phá thất bại, thương thế trầm trọng!</span>");
+            }
+        }
+        updateUI();
+    }
+
+    async function callHeaven() {
+        const key = localStorage.getItem('tu_tien_api_key');
+        if(!key) return addLog("Lỗi: Hãy vào tab Cài Đặt dán API Key!");
+        
+        const btn = document.getElementById('btn-explore');
+        btn.disabled = true; btn.innerText = "ĐANG KẾT NỐI...";
+
+        let r = Math.random();
+        let mode = r < 0.3 ? "XAU" : (r < 0.8 ? "BT" : "TOT");
+        let query = `Viết 1 câu tu tiên 8 chữ: ${mode=="XAU"?"bị quái thú cắn":"nhặt được linh thạch"}`;
 
         try {
-            // SỬA ĐÚNG TÊN MODEL TRONG ẢNH CỦA ÔNG: gemini-2.5-flash
-            const res = await fetch(`
+            // SỬA MODEL CHUẨN TRONG HÌNH: gemini-2.5-flash
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ contents: [{ parts: [{ text: query }] }] })
+            });
+            const data = await res.json();
+            if(data.error) throw new Error(data.error.message);
+
+            let txt = data.candidates[0].content.parts[0].text.trim();
+            if(mode=="XAU") { p.hp -= 15; if(p.hp < 0) p.hp = 0; addLog(`🔴 ${txt} (-15 Máu)`); }
+            else if(mode=="BT") { p.gold += 40; addLog(`🟡 ${txt} (+40 Vàng)`); }
+            else { p.inv.push({n:"Linh Kiếm", s:"+5 Công"}); p.atk += 5; addLog(`🟣 ${txt} (Nhận đồ)`); }
+        } catch(e) {
+            addLog(`<span style='color:orange'>Thiên đạo nghẽn: ${e.message.substring(0,20)}...</span>`);
+            p.gold += 5; addLog("Bản năng giúp nhặt được 5 đồng lẻ.");
+        }
+        btn.disabled = false; btn.innerText = "🚶 XUẤT THẾ THÁM HIỂM";
+        updateUI();
+    }
+
+    function saveKey() {
+        const val = document.getElementById('input-api').value.trim();
+        localStorage.setItem('tu_tien_api_key', val);
+        addLog("<span style='color:#00d2ff'>Đã nạp Linh Thạch (API)!</span>");
+    }
+
+    function resetGame() {
+        if(confirm("Xóa hết dữ liệu tu luyện để chơi lại từ đầu?")) {
+            localStorage.removeItem('tu_tien_save');
+            location.reload();
+        }
+    }
+
+    window.onload = () => {
+        const k = localStorage.getItem('tu_tien_api_key');
+        if(k) document.getElementById('input-api').value = k;
+        updateUI();
+    };
+</script>
+</body>
+</html>

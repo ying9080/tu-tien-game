@@ -1,64 +1,38 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Kiểm tra Thiên Đạo</title>
-    <style>
-        body { background: #000; color: #fff; font-family: sans-serif; padding: 20px; text-align: center; }
-        input { width: 80%; padding: 15px; margin: 10px 0; background: #222; color: #fff; border: 1px solid #444; }
-        button { padding: 15px 30px; background: #ffcc00; border: none; font-weight: bold; cursor: pointer; }
-        #ket-qua { margin-top: 20px; text-align: left; background: #111; padding: 15px; border-radius: 8px; white-space: pre-wrap; font-size: 12px; border: 1px solid #333; }
-        .success { color: #2ecc71; }
-        .error { color: #ff4d4d; }
-    </style>
-</head>
-<body>
-    <h2>KÍNH CHIẾU YÊU API</h2>
-    <p>Dán Key vào đây để xem "Thiên Đạo" có mở cửa không</p>
-    <input type="text" id="key" placeholder="AIzaSy..."> <br>
-    <button onclick="kiemTra()">BẮT ĐẦU KIỂM TRA</button>
-
-    <div id="ket-qua">Kết quả sẽ hiện ở đây...</div>
+<head><meta charset="UTF-8"><title>Kính Chiếu Yêu v2.0</title></head>
+<body style="background:#000; color:#fff; font-family:sans-serif; text-align:center; padding:20px;">
+    <h2>KÍNH CHIẾU YÊU v2.0</h2>
+    <input type="text" id="key" style="width:80%; padding:15px; background:#222; color:#fff; border:1px solid #444;" placeholder="Dán API Key vào đây...">
+    <br><button onclick="check()" style="padding:15px 30px; background:#ffcc00; border:none; margin-top:10px; font-weight:bold;">SOI MODEL KHẢ DỤNG</button>
+    <div id="out" style="margin-top:20px; text-align:left; background:#111; padding:15px; border-radius:8px; font-size:12px; border:1px solid #333; white-space:pre-wrap;"></div>
 
     <script>
-        async function kiemTra() {
+        async function check() {
             const key = document.getElementById('key').value.trim();
-            const log = document.getElementById('ket-qua');
-            if(!key) return alert("Nhập Key đã đạo hữu!");
+            const out = document.getElementById('out');
+            if(!key) return alert("Chưa nhập Key!");
+            out.innerHTML = "Đang hỏi Thiên Đạo...\n";
 
-            log.innerHTML = "Đang kết nối Thiên Đạo...\n";
-            
-            // Thử 3 loại model phổ biến nhất
-            const models = [
-                "gemini-1.5-flash",
-                "gemini-1.5-flash-latest",
-                "gemini-pro"
-            ];
+            try {
+                // Gọi lệnh liệt kê Model của Google
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+                const data = await res.json();
 
-            for (let m of models) {
-                log.innerHTML += `\n--- Thử Model: ${m} ---`;
-                try {
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${key}`, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ contents: [{ parts: [{ text: "Xin chào" }] }] })
+                if (data.error) {
+                    out.innerHTML = `<span style="color:red">❌ THẤT BẠI: ${data.error.status}\nLý do: ${data.error.message}</span>`;
+                } else {
+                    out.innerHTML = `<span style="color:green">✅ THÀNH CÔNG! Key của bạn dùng được các Model sau:</span>\n`;
+                    data.models.forEach(m => {
+                        if(m.supportedGenerationMethods.includes("generateContent")) {
+                            out.innerHTML += `- ${m.name}\n`;
+                        }
                     });
-                    
-                    const data = await res.json();
-                    
-                    if (data.error) {
-                        log.innerHTML += `\n❌ Thất bại: ${data.error.code} - ${data.error.message}`;
-                    } else {
-                        const txt = data.candidates[0].content.parts[0].text;
-                        log.innerHTML += `\n✅ THÀNH CÔNG! AI phản hồi: "${txt}"`;
-                        log.innerHTML += `\n==> Hãy dùng Model này cho game của ông!`;
-                        return; // Dừng lại khi tìm thấy model đúng
-                    }
-                } catch (e) {
-                    log.innerHTML += `\n❌ Lỗi mạng: ${e.message}`;
+                    out.innerHTML += `\n==> Hãy copy cái tên nào có chữ 'gemini-1.5-flash' hoặc 'gemini-pro' để dùng!`;
                 }
+            } catch (e) {
+                out.innerHTML = `❌ Lỗi kết nối mạng: ${e.message}`;
             }
-            log.innerHTML += `\n\n[KẾT LUẬN]: Không model nào chạy được. Kiểm tra lại Key hoặc vùng quốc gia!`;
         }
     </script>
 </body>

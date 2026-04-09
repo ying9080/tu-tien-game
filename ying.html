@@ -3,173 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tu Tiên Simulator v14.0</title>
+    <title>Ying - Thiên Đạo Chí Tôn v16</title>
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-        body { margin: 0; background: #080808; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        /* Chỉ số Header */
-        header { background: #000; padding: 15px; border-bottom: 2px solid #ffcc00; flex-shrink: 0; box-shadow: 0 2px 10px rgba(255,204,0,0.2); }
-        .lv-title { font-size: 20px; font-weight: bold; color: #ffcc00; text-align: center; margin-bottom: 8px; text-shadow: 0 0 5px rgba(255,204,0,0.5); }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px; }
-        .bar-bg { width: 100%; height: 8px; background: #222; border-radius: 4px; margin-top: 3px; border: 1px solid #333; overflow: hidden; }
-        .bar-fill { height: 100%; width: 0%; transition: width 0.5s ease-in-out; }
+        /* --- THIẾT LẬP PHONG CÁCH "SANG TRỌNG & U TỐI" --- */
+        :root {
+            --gold: #ffcc00; --gold-dark: #b8860b;
+            --bg: #050505; --card-bg: rgba(20, 20, 22, 0.95);
+            --border: #333; --text-main: #e0e0e0; --text-dim: #888;
+            --red: #ff4d4d; --blue: #00d2ff; --green: #2ecc71;
+        }
 
-        /* Menu */
-        nav { display: flex; background: #111; flex-shrink: 0; border-bottom: 1px solid #222; }
-        .m-btn { flex: 1; padding: 15px 0; border: none; background: none; color: #666; font-weight: bold; font-size: 11px; transition: 0.3s; }
-        .m-btn.active { color: #ffcc00; border-bottom: 3px solid #ffcc00; background: #1a1a1a; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { 
+            margin: 0; background: var(--bg); color: var(--text-main); 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+        }
 
-        /* Nội dung chính */
-        main { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; }
-        .tab { display: none; height: 100%; }
-        .tab.active { display: block; }
-        .card { background: #151515; padding: 20px; border-radius: 12px; border: 1px solid #252525; text-align: center; margin-bottom: 15px; }
-        
-        /* Nút bấm */
-        .btn { width: 100%; padding: 18px; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; margin-top: 10px; cursor: pointer; transition: 0.2s; }
-        .btn:active { transform: scale(0.96); opacity: 0.8; }
-        .btn-train { background: #ffffff; color: #000; }
-        .btn-exp { background: #00d2ff; color: #fff; box-shadow: 0 4px #008eb4; }
-        .btn-gold { background: #ffcc00; color: #000; box-shadow: 0 4px #b8860b; }
+        /* --- HEADER: CHỈ SỐ NHÂN VẬT --- */
+        header { 
+            padding: 15px; background: #000; border-bottom: 1px solid var(--gold); 
+            display: grid; grid-template-columns: auto 1fr; gap: 15px; flex-shrink: 0;
+        }
+        .avatar-frame { width: 50px; height: 50px; border: 2px solid var(--gold); border-radius: 10px; overflow: hidden; position: relative; }
+        .avatar-frame img { width: 100%; height: 100%; object-fit: cover; }
+        .main-stats { display: flex; flex-direction: column; justify-content: space-between; }
+        .lv-info { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; }
+        .resource-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
+        .stat-bar { height: 6px; background: #222; border-radius: 3px; overflow: hidden; margin-top: 2px; border: 0.5px solid #444; }
+        .bar-fill { height: 100%; transition: width 0.5s ease; }
 
-        /* Khu vực viết văn (Log) */
-        #log { background: #000; border: 1px solid #222; padding: 15px; border-radius: 10px; flex-grow: 1; overflow-y: auto; font-family: 'Georgia', serif; font-size: 14px; color: #bbb; line-height: 1.6; border-left: 4px solid #ffcc00; }
-        .log-entry { margin-bottom: 12px; animation: slideIn 0.3s ease-out; }
+        /* --- MAIN VIEW: KHUNG CỐT TRUYỆN --- */
+        main { flex-grow: 1; position: relative; display: flex; flex-direction: column; padding: 15px; overflow: hidden; }
+        .log-container { 
+            flex-grow: 1; background: var(--card-bg); border: 1px solid var(--border); 
+            border-radius: 15px; padding: 15px; overflow-y: auto;
+            display: flex; flex-direction: column-reverse; box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+        }
+        .log-entry { margin-bottom: 12px; font-size: 14px; line-height: 1.6; border-left: 3px solid transparent; padding-left: 10px; animation: slideIn 0.3s ease; }
         @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-        .item-box { background: #1a1a1a; padding: 10px; border-radius: 6px; margin-bottom: 5px; display: flex; justify-content: space-between; border: 1px solid #333; font-size: 13px; }
+
+        /* --- BOTTOM DOCK: NÚT HÀNH ĐỘNG --- */
+        .bottom-dock { 
+            background: #111; padding: 10px 15px 20px 15px; 
+            border-top: 1px solid var(--border); border-radius: 25px 25px 0 0; flex-shrink: 0;
+        }
+        .sub-info { display: flex; justify-content: space-around; font-size: 11px; margin-bottom: 10px; color: var(--text-dim); }
+        .sub-info b { color: var(--gold); }
+        .action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .nav-btn { 
+            padding: 12px 5px; background: #222; border: 1px solid #333; color: #777;
+            border-radius: 10px; font-size: 10px; font-weight: bold; transition: 0.2s;
+        }
+        .nav-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
+        .btn-main { 
+            grid-column: span 4; padding: 18px; margin-top: 10px; border-radius: 12px;
+            font-size: 16px; font-weight: bold; border: none; cursor: pointer;
+            background: linear-gradient(135deg, var(--gold), #ff8800); color: #000;
+        }
+
+        /* --- POPUP SỰ KIỆN (INSPIRED BY IMAGE_21) --- */
+        .overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); 
+            display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px;
+        }
+        .event-card { 
+            background: #1a1a1c; border: 1px solid var(--gold); width: 100%; max-width: 350px;
+            border-radius: 20px; padding: 25px; text-align: center; position: relative;
+        }
+        .event-img { width: 120px; height: 160px; background: #000; border-radius: 10px; margin: 0 auto 20px; border: 1px solid #444; }
+        .event-title { color: var(--gold); font-size: 18px; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; }
+        .event-text { font-size: 15px; color: #ccc; line-height: 1.7; font-style: italic; margin-bottom: 25px; }
+        .event-btns { display: flex; gap: 10px; }
+        .e-btn { flex: 1; padding: 15px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; }
+        .btn-yes { background: var(--gold); color: #000; }
+        .btn-no { background: #333; color: #fff; }
+
+        /* --- TÚI ĐỒ (GRID 2050 Ô) --- */
+        .inventory-view { display: none; height: 100%; }
+        .inv-grid { 
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; 
+            padding: 10px; max-height: 350px; overflow-y: auto; 
+        }
+        .inv-slot { aspect-ratio: 1/1; background: #222; border: 1px solid #333; border-radius: 8px; position: relative; }
+        .inv-slot.gold { border-color: var(--gold); box-shadow: inset 0 0 10px rgba(255,204,0,0.2); }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="lv-title" id="ui-lv">Phàm Cốt Tầng 1</div>
-    <div class="stats-grid">
-        <div>❤️ Máu: <span id="ui-hp-t">100/100</span><div class="bar-bg"><div id="ui-hp-b" class="bar-fill" style="background:#ff4d4d; width:100%"></div></div></div>
-        <div>⚡ Linh Lực: <span id="ui-ex-t">0/100</span><div class="bar-bg"><div id="ui-ex-b" class="bar-fill" style="background:#00d2ff; width:0%"></div></div></div>
+    <div class="avatar-frame">
+        <img src="https://via.placeholder.com/50" alt="Ying">
     </div>
-    <div style="display:flex; justify-content:space-between; font-size:10px; color:#888; margin-top:8px;">
-        <span>⚔️ Công: <b id="ui-atk" style="color:#ffcc00">10</b></span>
-        <span>🛡️ Thủ: <b id="ui-def" style="color:#00d2ff">5</b></span>
-        <span>💰 Linh Thạch: <b id="ui-gold" style="color:#ffcc00">0</b></span>
+    <div class="main-stats">
+        <div class="lv-info">
+            <span id="ui-name">Đạo Hữu Ying</span>
+            <span id="ui-lv" style="color:var(--gold)">Luyện Khí Tầng 1</span>
+        </div>
+        <div class="resource-row">
+            <div>
+                <div style="font-size:9px">❤️ SINH LỰC</div>
+                <div class="stat-bar"><div id="bar-hp" class="bar-fill" style="width:100%; background:var(--red)"></div></div>
+            </div>
+            <div>
+                <div style="font-size:9px">⚡ LINH LỰC</div>
+                <div class="stat-bar"><div id="bar-ex" class="bar-fill" style="width:0%; background:var(--blue)"></div></div>
+            </div>
+        </div>
     </div>
 </header>
 
-<nav>
-    <button class="m-btn active" onclick="tab('t-tu',this)">TU LUYỆN</button>
-    <button class="m-btn" onclick="tab('t-di',this)">LỊCH LUYỆN</button>
-    <button class="m-btn" onclick="tab('t-kho',this)">TÚI ĐỒ</button>
-    <button class="m-btn" onclick="tab('t-set',this)">CÀI ĐẶT</button>
-</nav>
-
 <main>
-    <div id="t-tu" class="tab active">
-        <div class="card">
-            <h3 style="margin:0 0 10px 0;">Động Phủ Bế Quan</h3>
-            <button id="b-train" class="btn btn-train" onclick="play('tu')">🧘 VẬN CÔNG TU LUYỆN</button>
-            <button id="b-break" class="btn btn-gold" style="display:none" onclick="play('pha')">🔥 ĐỘT PHÁ CẢNH GIỚI</button>
+    <div id="view-story" class="tab-view active">
+        <div class="log-container" id="log">
+            <div class="log-entry" style="color:var(--gold)">Hệ thống: Thiên Đạo V16 đã khởi khởi động. Ying, hãy bắt đầu con đường của ngươi.</div>
         </div>
     </div>
 
-    <div id="t-di" class="tab">
-        <div class="card">
-            <h3 style="margin:0 0 10px 0; color:#00d2ff;">Vạn Yêu Sơn Mạch</h3>
-            <button class="btn btn-exp" onclick="goAI()" id="b-go">🚶 XUẤT THẾ THÁM HIỂM</button>
-        </div>
-    </div>
-
-    <div id="t-kho" class="tab">
-        <div class="card">
-            <h3 style="margin:0 0 10px 0; color:#2ecc71;">Túi Trữ Vật</h3>
-            <div id="ui-inv">Trống rỗng...</div>
-        </div>
-    </div>
-
-    <div id="t-set" class="tab">
-        <div class="card" style="text-align:left">
-            <h3 style="margin:0 0 10px 0; color:#ff4d4d;">Thiết Lập API</h3>
-            <input type="password" id="api-in" style="width:100%; padding:15px; background:#000; color:#fff; border:1px solid #444; border-radius:8px;" placeholder="Dán mã API vào đây...">
-            <button class="btn btn-gold" onclick="save()">💾 LƯU LINH THẠCH</button>
-        </div>
-    </div>
-
-    <div id="log">
-        <div class="log-entry" style="color:#ffcc00">> Thiên Đạo v14.0 khởi chạy. Ying, con đường nghịch thiên chính thức bắt đầu...</div>
+    <div id="view-inv" class="tab-view inventory-view">
+        <h3 style="text-align:center; color:var(--gold)">Túi Trữ Vật (82/2050)</h3>
+        <div class="inv-grid" id="inv-grid">
+            </div>
     </div>
 </main>
 
+<div class="bottom-dock">
+    <div class="sub-info">
+        <span>⚔️ Công: <b id="ui-atk">10</b></span>
+        <span>🛡️ Thủ: <b id="ui-def">5</b></span>
+        <span>💰 Linh Thạch: <b id="ui-gold">1000</b></span>
+    </div>
+    <div class="action-grid">
+        <button class="nav-btn active" onclick="changeTab('story', this)">BẢN ĐỒ</button>
+        <button class="nav-btn" onclick="changeTab('inv', this)">TÚI ĐỒ</button>
+        <button class="nav-btn">THẦN THÔNG</button>
+        <button class="nav-btn" onclick="toggleSettings()">CÀI ĐẶT</button>
+        <button class="btn-main" id="btn-explore" onclick="triggerEvent()">🚶 XUẤT THẾ THÁM HIỂM</button>
+    </div>
+</div>
+
+<div class="overlay" id="event-overlay">
+    <div class="event-card">
+        <div class="event-title" id="ev-title">GẶP MẶT TU SĨ</div>
+        <div class="event-img">
+            <div style="padding-top:60px; color:#444">KỲ NGỘ</div>
+        </div>
+        <div class="event-text" id="ev-text">
+            "Tại vì Bọn Chúng... Haizzz... Này người bạn trẻ, giúp ta một việc được chứ?"
+        </div>
+        <div class="event-btns">
+            <button class="e-btn btn-yes" onclick="handleEvent('yes')">CHẤP NHẬN</button>
+            <button class="e-btn btn-no" onclick="handleEvent('no')">TỪ CHỐI</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    let p = JSON.parse(localStorage.getItem('tt_v14')) || { lv:0, caps:["Phàm Cốt 1","Phàm Cốt 5","Phàm Cốt 9","Luyện Khí","Trúc Cơ"], hp:100, mHp:100, exp:0, mExp:100, gold:0, atk:10, def:5, inv:[] };
-    
-    function log(m, color="#bbb") { 
-        const d = document.getElementById('log'); 
-        d.innerHTML = `<div class="log-entry" style="color:${color}">— ${m}</div>` + d.innerHTML; 
+    /* --- HỆ THỐNG QUẢN LÝ MASTER STATE --- */
+    const G = {
+        p: { name: "Ying", lv: 1, title: "Phàm Nhân", hp: 100, mHp: 100, ex: 0, mEx: 100, gold: 1000, atk: 10, def: 5, inv: [] },
+        settings: { apiKey: localStorage.getItem('ying_api_v16') || "" }
+    };
+
+    function log(m, color="#ccc") {
+        const d = document.getElementById('log');
+        d.innerHTML = `<div class="log-entry" style="color:${color}">— ${m}</div>` + d.innerHTML;
     }
 
-    function tab(id, b) { 
-        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); 
-        document.querySelectorAll('.m-btn').forEach(n=>n.classList.remove('active')); 
-        document.getElementById(id).classList.add('active'); b.classList.add('active'); 
+    function changeTab(tab, btn) {
+        document.querySelectorAll('.tab-view').forEach(v => v.style.display = 'none');
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('view-' + tab).style.display = tab === 'inv' ? 'block' : 'none';
+        if(tab === 'story') document.getElementById('view-story').style.display = 'flex';
+        btn.classList.add('active');
+        if(tab === 'inv') renderInv();
     }
 
-    function save() { 
-        localStorage.setItem('api_key_v14', document.getElementById('api-in').value.trim()); 
-        log("Cảm ứng được linh khí từ API Key. Đã kết nối!", "#00d2ff"); 
-    }
-
-    function ui() {
-        document.getElementById('ui-lv').innerText = p.caps[p.lv]; 
-        document.getElementById('ui-hp-t').innerText = p.hp+"/"+p.mHp;
-        document.getElementById('ui-hp-b').style.width = (p.hp/p.mHp)*100+"%"; 
-        document.getElementById('ui-ex-t').innerText = p.exp+"/"+p.mExp;
-        document.getElementById('ui-ex-b').style.width = (p.exp/p.mExp)*100+"%";
-        document.getElementById('ui-gold').innerText = p.gold;
-        document.getElementById('ui-atk').innerText = p.atk;
-        document.getElementById('ui-def').innerText = p.def;
-        document.getElementById('b-train').style.display = p.exp >= p.mExp ? 'none' : 'block'; 
-        document.getElementById('b-break').style.display = p.exp >= p.mExp ? 'block' : 'none';
-        document.getElementById('ui-inv').innerHTML = p.inv.length ? p.inv.map(i=>`<div class="item-box"><b>${i.n}</b><span>${i.s}</span></div>`).join('') : "Trống...";
-        localStorage.setItem('tt_v14', JSON.stringify(p));
-    }
-
-    function play(t) {
-        if(t=='tu') { p.exp+=25; log("Ying tĩnh tọa bế quan, vận chuyển đại chu thiên, linh lực trong cơ thể nhộn nhạo tăng tiến.", "#fff"); }
-        if(t=='pha') { 
-            if(Math.random()>0.4){ p.lv++; p.exp=0; p.mExp+=50; p.atk+=10; log("Xung kích cảnh giới thành công! Một luồng khí thế hùng hồn quét sạch bốn phương!", "#ffcc00"); } 
-            else { p.hp-=20; log("Khí huyết nghịch chuyển, đột phá thất bại, Ying bị phản phệ trọng thương!", "#ff4d4d"); } 
+    function renderInv() {
+        const grid = document.getElementById('inv-grid');
+        grid.innerHTML = "";
+        for(let i=0; i<30; i++) { // Render 30 ô mẫu
+            const slot = document.createElement('div');
+            slot.className = 'inv-slot' + (i<2 ? ' gold' : '');
+            grid.appendChild(slot);
         }
-        ui();
     }
 
-    async function goAI() {
-        const key = localStorage.getItem('api_key_v14');
-        if(!key) return log("Lỗi: Hãy nạp API Key trong tab Cài Đặt!", "#ff4d4d");
-        const btn = document.getElementById('b-go'); btn.disabled = true; btn.innerText = "ĐANG VIẾT VĂN...";
-
-        let r = Math.random(); 
-        let loai = r < 0.3 ? "XAU" : (r < 0.8 ? "BT" : "TOT");
+    /* --- LOGIC TRUY VẤN THIÊN ĐẠO (AI) --- */
+    async function triggerEvent() {
+        if(!G.settings.apiKey) return alert("Vào Cài đặt nạp API Key!");
         
-        // PROMPT VIẾT VĂN CỰC MẠNH
-        let prompt = `Bạn là đại tác gia truyện tu tiên. Hãy viết 1 câu mô tả ngắn gọn, hào hùng (dưới 20 chữ) về việc tu sĩ Ying ${loai=="XAU"?"bị yêu thú tấn công bất ngờ trong rừng":"nhặt được túi linh thạch của tiền bối để lại"}.`;
+        const btn = document.getElementById('btn-explore');
+        btn.disabled = true; btn.innerText = "ĐANG SOI QUẺ...";
+
+        const prompt = "Bạn là nhà văn tiên hiệp. Hãy viết 1 câu dẫn thoại của một lão già thần bí gặp Ying giữa rừng, yêu cầu Ying giúp đỡ (dưới 30 chữ).";
 
         try {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemma-3-1b-it:generateContent?key=${key}`, {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemma-3-1b-it:generateContent?key=${G.settings.apiKey}`, {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
             });
             const data = await res.json();
-            let txt = data.candidates[0].content.parts[0].text.trim();
-
-            if(loai=="XAU") { p.hp-=15; log(`🔴 ${txt} (Mất 15 Máu)`, "#ff4d4d"); }
-            else if(loai=="BT") { p.gold+=40; log(`🟡 ${txt} (Nhận 40 Linh Thạch)`, "#ffcc00"); }
-            else { p.inv.push({n:"Linh Kiếm", s:"+5 Công"}); p.atk+=5; log(`🟣 ${txt} (Nhận Linh Kiếm)`, "#2ecc71"); }
+            const txt = data.candidates[0].content.parts[0].text.trim();
+            
+            // Hiển thị Pop-up theo phong cách ảnh 1000028158
+            document.getElementById('ev-text').innerText = `"${txt}"`;
+            document.getElementById('event-overlay').style.display = 'flex';
         } catch(e) {
-            log("Thiên đạo nghẽn mạch, Ying lầm lũi nhặt được 5 linh thạch lẻ.", "#888");
-            p.gold+=5;
+            log("Thiên đạo nghẽn mạch, kỳ ngộ vụt qua...", "#888");
         }
-        btn.disabled = false; btn.innerText = "🚶 XUẤT THẾ THÁM HIỂM"; ui();
+        btn.disabled = false; btn.innerText = "🚶 XUẤT THẾ THÁM HIỂM";
     }
-    window.onload = () => { if(localStorage.getItem('api_key_v14')) document.getElementById('api-in').value = localStorage.getItem('api_key_v14'); ui(); };
+
+    function handleEvent(choice) {
+        document.getElementById('event-overlay').style.display = 'none';
+        if(choice === 'yes') {
+            G.p.gold += 500;
+            log("Ying chấp nhận yêu cầu, nhận được 500 Linh thạch trả lễ.", "#ffcc00");
+        } else {
+            log("Ying lạnh lùng rời đi, không muốn vướng vào nhân quả.", "#888");
+        }
+        updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('ui-lv').innerText = `Luyện Khí Tầng ${G.p.lv}`;
+        document.getElementById('bar-hp').style.width = (G.p.hp/G.p.mHp)*100 + "%";
+        document.getElementById('bar-ex').style.width = (G.p.ex/G.p.mEx)*100 + "%";
+        document.getElementById('ui-gold').innerText = G.p.gold;
+        document.getElementById('ui-atk').innerText = G.p.atk;
+        document.getElementById('ui-def').innerText = G.p.def;
+    }
+
+    function toggleSettings() {
+        const key = prompt("Dán API Key vào đây:", G.settings.apiKey);
+        if(key) {
+            G.settings.apiKey = key;
+            localStorage.setItem('ying_api_v16', key);
+            log("Thiên Đạo ghi nhận: API Key đã nạp.", "#00d2ff");
+        }
+    }
+
+    window.onload = updateUI;
 </script>
 </body>
 </html>

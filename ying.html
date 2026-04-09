@@ -3,149 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tu Tiên Simulator Gen 2 - Vĩnh Hằng</title>
+    <title>Tu Tiên Simulator v7.0</title>
     <style>
-        /* CSS cho Gen 2 Dashboard - Tối ưu Neon Dark Mode */
-        :root { --gold: #ffcc00; --glow: rgba(255, 204, 0, 0.4); --bg: #050505; --panel: #111; --red: #ff4d4d; --blue: #00d2ff; --green: #2ecc71; --text: #d0d0d0; --border: #222;}
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', Tahoma, Verdana, sans-serif; font-size: 13px; line-height: 1.5; overflow-x: hidden; }
-        .gen2-container { display: grid; grid-template-columns: 280px 1fr 280px; gap: 15px; padding: 15px; height: 100vh; max-width: 1600px; margin: 0 auto;}
-        .panel { background: var(--panel); border-radius: 12px; border: 1px solid var(--border); padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); display: flex; flex-direction: column;}
+        :root { --vang: #ffcc00; --den: #0a0a0a; --xam: #1a1a1a; --do: #ff4d4d; --xanh-lam: #00d2ff; --xanh-la: #2ecc71; --chu: #e0e0e0; }
+        body { margin: 0; background: var(--den); color: var(--chu); font-family: sans-serif; user-select: none; }
         
-        /* Header & API Status */
-        .gen2-header { grid-column: 1 / -1; background: #000; padding: 10px 20px; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center;}
-        .level-title { font-size: 16px; font-weight: bold; color: var(--gold); text-shadow: 0 0 10px var(--glow); }
-        .api-status { font-size: 11px; display: flex; align-items: center; gap: 5px; }
-        .api-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px var(--red); }
-        .api-dot.connected { background: var(--green); box-shadow: 0 0 8px var(--green); }
+        /* Chỉ số cố định trên đầu */
+        .header { background: #000; padding: 15px; border-bottom: 2px solid var(--vang); position: sticky; top: 0; z-index: 100; }
+        .cap-do { font-size: 18px; font-weight: bold; color: var(--vang); margin-bottom: 10px; }
+        .thanh-chi-so { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; }
+        .khung-thanh { width: 100%; height: 10px; background: #333; border-radius: 5px; margin-top: 3px; overflow: hidden; }
+        .phan-tram { height: 100%; transition: 0.3s; }
 
-        /* Left Column - Character */
-        .portrait-frame { position: relative; width: 100%; height: 150px; border-radius: 8px; overflow: hidden; border: 2px solid var(--border); margin-bottom: 10px; }
-        .portrait-img { width: 100%; height: 100%; object-fit: cover; }
-        .stat-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
-        .bar-container { width: 100%; height: 8px; background: #1a1a1a; border-radius: 4px; overflow: hidden; border: 1px solid #333;}
-        .bar-fill { height: 100%; transition: width 0.5s ease; }
+        /* Menu điều hướng */
+        .menu { display: grid; grid-template-columns: repeat(4, 1fr); background: #111; }
+        .nut-menu { padding: 15px 0; border: none; background: none; color: #888; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .nut-menu.active { color: var(--vang); border-bottom: 3px solid var(--vang); background: #1a1a1a; }
+
+        /* Nội dung chính */
+        .vung-choi { padding: 20px; min-height: 300px; }
+        .tab-noi-dung { display: none; }
+        .tab-noi-dung.active { display: block; }
+        .khung-vien { background: var(--xam); padding: 20px; border-radius: 12px; border: 1px solid #333; text-align: center; }
         
-        /* Center Column - Activity */
-        .nav-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background: #1a1a1a; padding: 2px; border-radius: 6px; margin-bottom: 15px;}
-        .nav-btn { background: none; border: none; color: #777; padding: 10px 0; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center;}
-        .nav-btn.active { color: var(--gold); border-bottom: 2px solid var(--gold); }
-        .map-frame { width: 100%; height: 250px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 15px; position: relative;}
-        .map-img { width: 100%; height: 100%; object-fit: cover; }
-        .map-icon { position: absolute; cursor: pointer; transition: transform 0.2s; } .map-icon:hover { transform: scale(1.1); }
-        .quest-box { background: #000; padding: 15px; border-radius: 8px; border: 1px solid #222; text-align: left;}
-        .quest-text { font-family: 'Courier New', monospace; font-size: 13px; color: #888; }
-        .choice-btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
-        .choice-btn { background: #1a1a1a; border: 1px solid var(--border); color: #888; padding: 12px; font-size: 11px; border-radius: 4px; cursor: pointer; text-align: center; }
-        .choice-btn:hover { background: var(--panel); color: var(--gold); border-color: var(--gold); }
+        /* Nút hành động */
+        .nut-bam { width: 100%; padding: 18px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; color: #000; transition: 0.2s; }
+        .nut-bam:active { transform: scale(0.95); }
+        .nut-tu-luyen { background: #fff; box-shadow: 0 4px #ccc; }
+        .nut-tham-hiem { background: var(--xanh-lam); color: #fff; box-shadow: 0 4px #008cb1; }
+        .nut-dot-pha { background: var(--vang); box-shadow: 0 4px #b38f00; }
 
-        /* Right Column - Log */
-        .log-list { flex-grow: 1; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 11px; color: #aaa; line-height: 1.6; border-left: 3px solid var(--gold); padding-left: 10px; margin-bottom: 15px; }
-        .item-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-        .item-slot { background: #1a1a1a; border: 1px solid #333; aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .item-slot:hover { border-color: var(--gold); }
-        .footer-action-bar { display: flex; gap: 8px; margin-top: 15px;}
-        .btn-action { flex-grow: 1; background: #1a1a1a; color: #777; padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 11px; cursor: pointer; }
-        .btn-action:hover { color: #fff; background: var(--panel); border-color: var(--gold); }
+        /* Nhật ký */
+        .nhat-ky { background: #000; border: 1px solid #333; padding: 12px; border-radius: 8px; height: 160px; overflow-y: auto; font-size: 13px; margin-top: 15px; color: #aaa; text-align: left; line-height: 1.5; }
+        
+        /* Túi đồ */
+        .o-vat-pham { background: #222; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; border: 1px solid #333; }
+        
+        /* Cài đặt */
+        .nhap-lieu { width: 100%; padding: 15px; background: #222; border: 1px solid #444; color: #fff; border-radius: 8px; margin-top: 10px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-<div class="gen2-header">
-    <div class="level-title">TU TIÊN Gen 2</div>
-    <div class="api-status">
-        <div class="api-dot" id="api-dot"></div> API Status: <span id="api-status-text">Disconnected</span>
+<div class="header">
+    <div class="cap-do" id="hien-cap-do">Phàm Cốt Tầng 1</div>
+    <div class="thanh-chi-so">
+        <div>❤️ Máu: <span id="so-hp">100/100</span>
+            <div class="khung-thanh"><div id="thanh-hp" class="phan-tram" style="width:100%; background:var(--do)"></div></div>
+        </div>
+        <div>⚡ Linh Lực: <span id="so-exp">0/100</span>
+            <div class="khung-thanh"><div id="thanh-exp" class="phan-tram" style="width:0%; background:var(--xanh-lam)"></div></div>
+        </div>
+        <div style="margin-top:5px;">⚔️ Công: <b id="hien-atk" style="color:var(--vang)">10</b> | 🛡️ Thủ: <b id="hien-def" style="color:var(--xanh-lam)">5</b></div>
+        <div style="margin-top:5px;">⏳ Tuổi: <b id="hien-tuoi" style="color:var(--xanh-la)">18</b> | 💰 Tiền: <b id="hien-tien" style="color:var(--vang)">0</b></div>
     </div>
 </div>
 
-<div class="gen2-container">
-    <div class="panel">
-        <h3 style="margin-top:0; color:var(--gold)">Status Dashboard</h3>
-        <div class="portrait-frame">
-            <img src="https://ying9080.github.io/tu-tien-game/monk-portrait.jpg" alt="monk-portrait" class="portrait-img">
-        </div>
-        <div style="font-size:12px; color:#888;">Đạo hiệu: <b style="color:#fff">Ying</b></div>
-        <div style="font-size:12px; color:#888; margin-bottom:10px;">Level: <b id="p-level" style="color:var(--gold)">Phàm Cốt Tầng 1 (25%)</b></div>
-        
-        <div class="stat-grid">
-            <div>Sinh Lực: <span id="val-hp">100/100</span>
-                <div class="bar-container"><div id="bar-hp" class="bar-fill" style="width:100%; background:var(--green)"></div></div>
-            </div>
-            <div>Linh Lực: <span id="val-mp">0/100</span>
-                <div class="bar-container"><div id="bar-mp" class="bar-fill" style="width:0%; background:var(--blue)"></div></div>
-            </div>
-            <div>⏳ Thọ Nguyên: <span id="val-age" style="color:var(--green)">18/100</span></div>
-            <div>💰 Linh Thạch: <span id="val-gold" style="color:var(--gold)">50</span></div>
-        </div>
-        
-        <h4 style="margin-top:15px; color:#888; border-top:1px solid #222; padding-top:10px;">Attributes</h4>
-        <div style="display:flex; justify-content:space-between; font-size:12px; color:#888;">
-            <span>Công: <b id="val-atk" style="color:var(--gold)">10</b></span>
-            <span>Thủ: <b id="val-def" style="color:var(--blue)">5</b></span>
-        </div>
-        <div style="display:flex; justify-content:space-between; font-size:12px; color:#666; margin-top:5px;">
-            <span>Strength: 10</span> <span>Agility: 5</span> <span>Spirit: 15</span>
+<div class="menu">
+    <button class="nut-menu active" onclick="chuyenTab('tab-tu-luyen', this)">TU LUYỆN</button>
+    <button class="nut-menu" onclick="chuyenTab('tab-tham-hiem', this)">THÁM HIỂM</button>
+    <button class="nut-menu" onclick="chuyenTab('tab-tui-do', this)">TÚI ĐỒ</button>
+    <button class="nut-menu" onclick="chuyenTab('tab-cai-dat', this)">CÀI ĐẶT</button>
+</div>
+
+<div class="vung-choi">
+    <div id="tab-tu-luyen" class="tab-noi-dung active">
+        <div class="khung-vien">
+            <h2 style="color:var(--vang)">Động Phủ Tu Hành</h2>
+            <button id="btn-tu-luyen" class="nut-bam nut-tu-luyen" onclick="tuLuyen()">🧘 VẬN CÔNG HẤP THU</button>
+            <button id="btn-dot-pha" class="nut-bam nut-dot-pha" style="display:none" onclick="dotPha()">🔥 ĐỘT PHÁ CẢNH GIỚI</button>
         </div>
     </div>
 
-    <div class="panel">
-        <div class="nav-grid">
-            <button class="nav-btn">Tu Luyen</button>
-            <button class="nav-btn active">Lich Luyen</button>
-            <button class="nav-btn">Inventory</button>
-            <button class="nav-btn">Combat</button>
-            <button class="nav-btn">Settings</button>
-        </div>
-
-        <div id="activity-lich-luyen">
-            <h3 style="margin-top:0; color:var(--blue)">Lich Luyen</h3>
-            <div class="map-frame">
-                <img src="https://ying9080.github.io/tu-tien-game/mystical-map.jpg" alt="mystical-map" class="map-img">
-                <div class="map-icon" style="top:35%; left:25%; font-size:20px;" onclick="selectQuest('rung')">🌳 Rừng Sương Mù</div>
-                <div class="map-icon" style="top:25%; left:55%; font-size:20px;" onclick="selectQuest('van-yeu')">⛰️ Vạn Yêu Sơn</div>
-                <div class="map-icon" style="top:55%; left:45%; font-size:20px;" onclick="selectQuest('ho')">💧 Hồ Linh khí</div>
-                <div class="map-icon" style="top:48%; left:65%; font-size:20px;" onclick="selectQuest('cam-dia')">🌌 Cấm Địa</div>
-            </div>
-            <div class="quest-box">
-                <p id="quest-text" class="quest-text">Đạo hữu, Vạn Yêu Sơn đang mở. Bạn quyết định mạo hiểm?</p>
-                <div id="choice-btn-grid" class="choice-btn-grid" style="display:none">
-                    <button class="choice-btn" onclick="makeChoice('a')">[CHỌN ĐỒNG]</button>
-                    <button class="choice-btn" onclick="makeChoice('b')">[CHỌN BÌNH]</button>
-                    <button class="choice-btn" onclick="makeChoice('c')">[CHẠY TRỐN]</button>
-                    <button class="choice-btn" onclick="makeChoice('d')">[SỬ DỤNG ĐAN]</button>
-                </div>
-                <div id="battle-log-summary" style="margin-top:15px; font-size:11px; color:#444;">A mini-battle log summary: level 2 yêu thú, bế quan Exp +15%.</div>
-                <div id="age-gain-gain" style="font-size:11px; color:#444;">A mini-battle log summary: Thọ nguyên tăng 1 năm.</div>
-            </div>
+    <div id="tab-tham-hiem" class="tab-noi-dung">
+        <div class="khung-vien">
+            <h2 style="color:var(--xanh-lam)">Vạn Yêu Sơn</h2>
+            <button class="nut-bam nut-tham-hiem" onclick="thamHiem()" id="btn-tham-hiem">🚶 XUẤT THẾ THÁM HIỂM</button>
         </div>
     </div>
 
-    <div class="panel">
-        <h3 style="margin-top:0; color:var(--gold)">Log & Feed</h3>
-        <div class="log-list" id="log-list">
-            <div><span style="color:#555">[14:21]</span> <span style="color:var(--gold)">[KỲ NGỘ]</span> Gặp tu sĩ ẩn danh, nhận được 'Thái Ất Đan' (+20 Linh lực).</div>
-            <div><span style="color:#555">[14:18]</span> <span style="color:var(--red)">[CHIẾN ĐẤU]</span> Đánh thắng Độc Xà, nhặt được 'Tinh thạch vụn' (Linh thạch x50).</div>
-            <div><span style="color:#555">[14:15]</span> <span style="color:var(--green)">[TU LUYEN]</span> Kết thúc bế quan, thọ nguyên tăng 1 năm.</div>
+    <div id="tab-tui-do" class="tab-noi-dung">
+        <div class="khung-vien">
+            <h2 style="color:var(--xanh-la)">Túi Trữ Vật</h2>
+            <div id="danh-sach-do"><p style="color:#666">Chưa có gì...</p></div>
         </div>
-        
-        <h3 style="margin-top:15px; color:var(--gold); border-top:1px solid #222; padding-top:10px;">Inventory</h3>
-        <div class="item-grid">
-            <div class="item-slot">🗡️</div> <div class="item-slot">🍵</div> <div class="item-slot">📜</div>
-            <div class="item-slot"></div> <div class="item-slot"></div> <div class="item-slot"></div>
-            <div class="item-slot"></div> <div class="item-slot"></div> <div class="item-slot"></div>
+    </div>
+
+    <div id="tab-cai-dat" class="tab-noi-dung">
+        <div class="khung-vien" style="text-align: left;">
+            <h2 style="color:var(--do)">Cài Đặt AI</h2>
+            <p style="font-size:12px; color:#888;">Dán mã API Key vào đây để kích hoạt lời thoại tu tiên.</p>
+            <input type="password" id="nhap-api" class="nhap-lieu" placeholder="Dán API Key vào đây...">
+            <button class="nut-bam" style="background:var(--xanh-la); color:#fff;" onclick="luuAPI()">💾 LƯU MÃ API</button>
         </div>
-        
-        <div class="footer-action-bar">
-            <button class="btn-action">AFK Bế Quan</button>
-            <button class="btn-action">Hái Thuốc</button>
-            <button class="btn-action">Luyện Đan</button>
-        </div>
+    </div>
+
+    <div class="nhat-ky" id="nhat-ky-log">
+        <div>> Chào mừng đạo hữu Ying bắt đầu hành trình.</div>
     </div>
 </div>
 
 <script>
-    // Dữ liệu và logic được sửa để Gen 2 Dashboard và API thông mạng
-    // ... (Code Gen 2) ...
-</script>
+    let nv = {
+        capIdx: 0,
+        caps: ["Phàm Cốt Tầng 1", "Phàm Cốt Tầng 5", "Phàm Cốt Tầng 9", "Luyện Khí Kỳ", "Trúc Cơ Kỳ"],
+        hp: 100, maxHp: 100, exp: 0, maxExp: 100, tuoi: 18, maxTuoi: 100, vang: 0,
+        atk: 10, def: 5, tuiDo: []
+    };
 
+    window.onload = () => {
+        let key = localStorage.getItem('api_tu_tien');
+        if(key) document.getElementById('nhap-api').value = key;
+        capNhatUI();
+    };
+
+    function ghiLog(msg) {
+        const log = document.getElementById('nhat-ky-log');
+        log.innerHTML = `<div>> ${msg}</div>` + log.innerHTML;
+    }
+
+    function chuyenTab(id, btn) {
+        document.querySelectorAll('.tab-noi-dung').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nut-menu').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    function luuAPI() {
+        let key = document.getElementById('nhap-api').value.trim();
+        localStorage.setItem('api_tu_tien', key);
+        ghiLog("<span style='color:var(--xanh-la)'>Đã lưu mã API thành công!</span>");
+    }
+
+    function capNhatUI() {
+        document.getElementById('so-hp').innerText = `${nv.hp}/${nv.maxHp}`;
+        document.getElementById('thanh-hp').style.width = (nv.hp/nv.maxHp)*100 + "%";
+        document.getElementById('so-exp').innerText = `${nv.exp}/${nv.maxExp}`;
+        document.getElementById('thanh-exp').style.width = (nv.exp/nv.maxExp)*100 + "%";
+        document.getElementById('hien-tuoi').innerText = nv.tuoi;
+        document.getElementById('hien-tien').innerText = nv.vang;
+        document.getElementById('hien-atk').innerText = nv.atk;
+        document.getElementById('hien-def').innerText = nv.def;
+        document.getElementById('hien-cap-do').innerText = nv.caps[nv.capIdx];
+
+        if(nv.exp >= nv.maxExp) {
+            document.getElementById('btn-tu-luyen').style.display = 'none';
+            document.getElementById('btn-dot-pha').style.display = 'block';
+        } else {
+            document.getElementById('btn-tu-luyen').style.display = 'block';
+            document.getElementById('btn-dot-pha').style.display = 'none';
+        }
+
+        const tui = document.getElementById('danh-sach-do');
+        if(nv.tuiDo.length === 0) tui.innerHTML = "<p style='color:#666'>Trống rỗng...</p>";
+        else tui.innerHTML = nv.tuiDo.map(i => `<div class="o-vat-pham"><b>${i.ten}</b> <span>${i.chiSo}</span></div>`).join('');
+    }
+
+    function tuLuyen() {
+        if(nv.tuoi >= nv.maxTuoi) return ghiLog("<span style='color:red'>Hết thọ nguyên!</span>");
+        nv.exp += 25; nv.tuoi += 1;
+        ghiLog("Vận công 1 năm, linh lực tăng tiến.");
+        capNhatUI();
+    }
+
+    function dotPha() {
+        if(Math.random() > 0.4) {
+            nv.capIdx++; nv.exp = 0; nv.maxExp += 50; nv.maxTuoi += 50;
+            nv.atk += 10; nv.def += 5;
+            ghiLog(`<span style='color:var(--vang)'>ĐỘT PHÁ THÀNH CÔNG lên ${nv.caps[nv.capIdx]}!</span>`);
+        } else {
+            nv.hp -= 20; ghiLog("<span style='color:red'>Đột phá thất bại, bị thương nhẹ.</span>");
+        }
+        capNhatUI();
+    }
+
+    async function thamHiem() {
+        const key = localStorage.getItem('api_tu_tien');
+        if(!key) return ghiLog("<span style='color:red'>Lỗi: Chưa nhập mã API trong phần Cài Đặt!</span>");
+        
+        const btn = document.getElementById('btn-tham-hiem');
+        btn.disabled = true; btn.innerText = "ĐANG XỬ LÝ...";
+
+        let roll = Math.random();
+        let loai = roll < 0.3 ? "XAU" : (roll < 0.8 ? "BT" : "TOT");
+        let yeuCau = `Viết 1 câu tu tiên ngắn (8 chữ) về: ${loai === "XAU" ? "bị quái đánh" : "lượm được tiền"}`;
+
+        try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ contents: [{ parts: [{ text: yeuCau }] }] })
+            });
+
+            const data = await res.json();
+            if(data.error) throw new Error(`${data.error.code}: ${data.error.message}`);
+
+            let cauTraLoi = data.candidates[0].content.parts[0].text.trim();
+            
+            if(loai === "XAU") { nv.hp -= 15; ghiLog(`🔴 ${cauTraLoi} (-15 Máu)`); }
+            else if(loai === "BT") { nv.vang += 50; ghiLog(`🟡 ${cauTraLoi} (+50 Linh thạch)`); }
+            else { 
+                nv.tuiDo.push({ten: "Thanh Kiếm Sắt", chiSo: "+5 Công"});
+                nv.atk += 5;
+                ghiLog(`🟣 ${cauTraLoi} (Nhận Kiếm +5 Công)`); 
+            }
+        } catch(e) {
+            ghiLog(`<span style='color:orange'>Lỗi API: ${e.message.substring(0,30)}...</span>`);
+            nv.vang += 5; ghiLog("Nhưng bạn lượm được 5 Linh thạch lẻ.");
+        }
+        
+        btn.disabled = false; btn.innerText = "🚶 XUẤT THẾ THÁM HIỂM";
+        capNhatUI();
+    }
+</script>
 </body>
 </html>

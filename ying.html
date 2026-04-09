@@ -2,202 +2,64 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tu Tiên Simulator v9.0</title>
+    <title>Kiểm tra Thiên Đạo</title>
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        :root { --vang: #ffcc00; --den: #0d0d0d; --xam: #1a1a1c; --do: #ff4d4d; --xanh: #00d2ff; --chu: #e0e0e0; }
-        body { margin: 0; background: var(--den); color: var(--chu); font-family: sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
-        
-        /* Chỉ số - Nằm gọn trên đầu */
-        .header { background: #000; padding: 12px; border-bottom: 2px solid var(--vang); flex-shrink: 0; }
-        .cap-do { font-size: 18px; font-weight: bold; color: var(--vang); text-shadow: 0 0 5px rgba(255,204,0,0.5); margin-bottom: 5px; text-align: center; }
-        .grid-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px; }
-        .thanh-nen { width: 100%; height: 8px; background: #333; border-radius: 4px; overflow: hidden; margin-top: 2px; border: 1px solid #444; }
-        .thanh-chay { height: 100%; transition: 0.4s; }
-
-        /* Menu điều hướng */
-        .menu { display: flex; background: #111; border-bottom: 1px solid #222; }
-        .nut-menu { flex: 1; padding: 15px 0; border: none; background: none; color: #666; font-size: 11px; font-weight: bold; }
-        .nut-menu.active { color: var(--vang); border-bottom: 3px solid var(--vang); background: #1a1a1a; }
-
-        /* Vùng nội dung - Tự co giãn */
-        .vung-choi { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; }
-        .tab { display: none; width: 100%; }
-        .tab.active { display: block; }
-        .khung { background: var(--xam); padding: 20px; border-radius: 12px; border: 1px solid #333; text-align: center; margin-bottom: 15px; }
-        
-        .nut-bam { width: 100%; padding: 16px; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; margin-top: 10px; color: #000; cursor: pointer; transition: 0.2s; }
-        .nut-bam:active { transform: scale(0.95); opacity: 0.8; }
-        .nut-tu { background: #fff; box-shadow: 0 4px #bbb; }
-        .nut-di { background: var(--xanh); color: #fff; box-shadow: 0 4px #008eb4; }
-        .nut-vang { background: var(--vang); box-shadow: 0 4px #b8860b; }
-
-        /* Nhật ký - Tự bám đáy */
-        .nhat-ky { background: #000; border: 1px solid #222; padding: 12px; border-radius: 8px; height: 180px; overflow-y: auto; font-family: monospace; font-size: 12px; color: #888; text-align: left; line-height: 1.5; }
-        .o-do { background: #222; padding: 10px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; font-size: 12px; border: 1px solid #333; }
+        body { background: #000; color: #fff; font-family: sans-serif; padding: 20px; text-align: center; }
+        input { width: 80%; padding: 15px; margin: 10px 0; background: #222; color: #fff; border: 1px solid #444; }
+        button { padding: 15px 30px; background: #ffcc00; border: none; font-weight: bold; cursor: pointer; }
+        #ket-qua { margin-top: 20px; text-align: left; background: #111; padding: 15px; border-radius: 8px; white-space: pre-wrap; font-size: 12px; border: 1px solid #333; }
+        .success { color: #2ecc71; }
+        .error { color: #ff4d4d; }
     </style>
 </head>
 <body>
+    <h2>KÍNH CHIẾU YÊU API</h2>
+    <p>Dán Key vào đây để xem "Thiên Đạo" có mở cửa không</p>
+    <input type="text" id="key" placeholder="AIzaSy..."> <br>
+    <button onclick="kiemTra()">BẮT ĐẦU KIỂM TRA</button>
 
-<div class="header">
-    <div class="cap-do" id="txt-cap">Phàm Cốt Tầng 1</div>
-    <div class="grid-stats">
-        <div>❤️ Máu: <span id="txt-hp">100/100</span>
-            <div class="thanh-nen"><div id="bar-hp" class="thanh-chay" style="width:100%; background:var(--do)"></div></div>
-        </div>
-        <div>⚡ Linh Lực: <span id="txt-exp">0/100</span>
-            <div class="thanh-nen"><div id="bar-exp" class="thanh-chay" style="width:0%; background:var(--xanh)"></div></div>
-        </div>
-        <div style="grid-column: 1 / -1; display:flex; justify-content:space-between; margin-top:5px; color:#aaa; font-size:10px; border-top:1px solid #222; padding-top:5px;">
-            <span>⚔️ Công: <b id="txt-atk" style="color:var(--vang)">10</b></span>
-            <span>🛡️ Thủ: <b id="txt-def" style="color:var(--xanh)">5</b></span>
-            <span>💰 Tiền: <b id="txt-gold" style="color:var(--vang)">0</b></span>
-        </div>
-    </div>
-</div>
+    <div id="ket-qua">Kết quả sẽ hiện ở đây...</div>
 
-<div class="menu">
-    <button class="nut-menu active" onclick="tab('tab-tu', this)">TU LUYỆN</button>
-    <button class="nut-menu" onclick="tab('tab-di', this)">THÁM HIỂM</button>
-    <button class="nut-menu" onclick="tab('tab-kho', this)">TÚI ĐỒ</button>
-    <button class="nut-menu" onclick="tab('tab-api', this)">CÀI ĐẶT</button>
-</div>
+    <script>
+        async function kiemTra() {
+            const key = document.getElementById('key').value.trim();
+            const log = document.getElementById('ket-qua');
+            if(!key) return alert("Nhập Key đã đạo hữu!");
 
-<div class="vung-choi">
-    <div id="tab-tu" class="tab active">
-        <div class="khung">
-            <h3 style="color:var(--vang); margin:0 0 10px 0;">Động Phủ Tĩnh Tọa</h3>
-            <button id="btn-tu" class="nut-bam nut-tu" onclick="choi('tu')">🧘 VẬN CÔNG (+25 EXP)</button>
-            <button id="btn-pha" class="nut-bam nut-vang" style="display:none" onclick="choi('pha')">🔥 ĐỘT PHÁ CẢNH GIỚI</button>
-        </div>
-    </div>
+            log.innerHTML = "Đang kết nối Thiên Đạo...\n";
+            
+            // Thử 3 loại model phổ biến nhất
+            const models = [
+                "gemini-1.5-flash",
+                "gemini-1.5-flash-latest",
+                "gemini-pro"
+            ];
 
-    <div id="tab-di" class="tab">
-        <div class="khung">
-            <h3 style="color:var(--xanh); margin:0 0 10px 0;">Vạn Yêu Sơn</h3>
-            <button class="nut-bam nut-di" onclick="goAI()" id="btn-go">🚶 XUẤT THẾ THÁM HIỂM</button>
-        </div>
-    </div>
-
-    <div id="tab-kho" class="tab">
-        <div class="khung">
-            <h3 style="color:var(--xanh); margin:0 0 10px 0;">Túi Trữ Vật</h3>
-            <div id="list-do" style="text-align:left;">Trống rỗng...</div>
-        </div>
-    </div>
-
-    <div id="tab-api" class="tab">
-        <div class="khung" style="text-align:left;">
-            <h3 style="color:var(--do); margin:0 0 10px 0;">Cài Đặt AI</h3>
-            <input type="password" id="api-key" style="width:100%; padding:14px; background:#000; color:#fff; border:1px solid #444; border-radius:8px;" placeholder="Dán mã API vào đây...">
-            <button class="nut-bam nut-vang" onclick="save()">💾 LƯU MÃ API</button>
-        </div>
-    </div>
-
-    <div class="nhat-ky" id="log">
-        <div>> Thiên Đạo V9.0 (Bản Chốt) khởi chạy.</div>
-    </div>
-</div>
-
-<script>
-    let p = {
-        lv: 0, lvs: ["Phàm Cốt Tầng 1", "Phàm Cốt Tầng 5", "Phàm Cốt Tầng 9", "Luyện Khí Kỳ", "Trúc Cơ Kỳ"],
-        hp: 100, mHp: 100, exp: 0, mExp: 100, gold: 0, atk: 10, def: 5, inv: []
-    };
-
-    function log(m) {
-        const d = document.getElementById('log');
-        d.innerHTML = `<div>> ${m}</div>` + d.innerHTML;
-    }
-
-    function tab(id, b) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.nut-menu').forEach(n => n.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        b.classList.add('active');
-    }
-
-    function save() {
-        localStorage.setItem('tu_tien_key_v9', document.getElementById('api-key').value.trim());
-        log("<span style='color:var(--xanh)'>Đã lưu Linh Thạch (API Key)!</span>");
-    }
-
-    function ui() {
-        document.getElementById('txt-cap').innerText = p.lvs[p.lv];
-        document.getElementById('txt-hp').innerText = `${p.hp}/${p.mHp}`;
-        document.getElementById('bar-hp').style.width = (p.hp/p.mHp)*100 + "%";
-        document.getElementById('txt-exp').innerText = `${p.exp}/${p.mExp}`;
-        document.getElementById('bar-exp').style.width = (p.exp/p.mExp)*100 + "%";
-        document.getElementById('txt-gold').innerText = p.gold;
-        document.getElementById('txt-atk').innerText = p.atk;
-        document.getElementById('txt-def').innerText = p.def;
-
-        document.getElementById('btn-tu').style.display = p.exp >= p.mExp ? 'none' : 'block';
-        document.getElementById('btn-pha').style.display = p.exp >= p.mExp ? 'block' : 'none';
-
-        const list = document.getElementById('list-do');
-        list.innerHTML = p.inv.length ? p.inv.map(i => `<div class="o-do"><b>${i.n}</b> <span>${i.s}</span></div>`).join('') : "Trống rỗng...";
-    }
-
-    function choi(t) {
-        if(t=='tu') { p.exp += 25; log("Tọa thiền hấp thu linh khí."); }
-        if(t=='pha') {
-            if(Math.random() > 0.4) { p.lv++; p.exp=0; p.mExp+=50; p.atk+=10; log("<b style='color:var(--vang)'>ĐỘT PHÁ THÀNH CÔNG!</b>"); }
-            else { p.hp -= 20; log("<span style='color:var(--do)'>Đột phá thất bại, thương thế trầm trọng!</span>"); }
+            for (let m of models) {
+                log.innerHTML += `\n--- Thử Model: ${m} ---`;
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${key}`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ contents: [{ parts: [{ text: "Xin chào" }] }] })
+                    });
+                    
+                    const data = await res.json();
+                    
+                    if (data.error) {
+                        log.innerHTML += `\n❌ Thất bại: ${data.error.code} - ${data.error.message}`;
+                    } else {
+                        const txt = data.candidates[0].content.parts[0].text;
+                        log.innerHTML += `\n✅ THÀNH CÔNG! AI phản hồi: "${txt}"`;
+                        log.innerHTML += `\n==> Hãy dùng Model này cho game của ông!`;
+                        return; // Dừng lại khi tìm thấy model đúng
+                    }
+                } catch (e) {
+                    log.innerHTML += `\n❌ Lỗi mạng: ${e.message}`;
+                }
+            }
+            log.innerHTML += `\n\n[KẾT LUẬN]: Không model nào chạy được. Kiểm tra lại Key hoặc vùng quốc gia!`;
         }
-        ui();
-    }
-
-    async function goAI() {
-        const key = localStorage.getItem('tu_tien_key_v9');
-        if(!key) return log("Lỗi: Qua tab Cài Đặt nạp API Key!");
-        
-        const btn = document.getElementById('btn-go');
-        btn.disabled = true; btn.innerText = "ĐANG XEM QUẺ...";
-
-        let r = Math.random();
-        let loai = r < 0.3 ? "XAU" : (r < 0.8 ? "BT" : "TOT");
-        let q = `Viết 1 câu tu tiên 8 chữ: ${loai=="XAU"?"bị quái đánh trúng":"nhặt được linh thạch"}`;
-
-        // CƠ CHẾ TỰ ĐỘNG THỬ NHIỀU MODEL (THÔNG MẠNG 100%)
-        const models = ["gemini-1.5-flash", "gemini-pro"];
-        let success = false;
-
-        for (let mName of models) {
-            try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${mName}:generateContent?key=${key}`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ contents: [{ parts: [{ text: q }] }] })
-                });
-                const data = await res.json();
-                
-                if (data.error) continue; // Thử model tiếp theo
-
-                let txt = data.candidates[0].content.parts[0].text.trim();
-                if(loai=="XAU") { p.hp -= 15; log(`🔴 ${txt} (-15 Máu)`); }
-                else if(loai=="BT") { p.gold += 40; log(`🟡 ${txt} (+40 Vàng)`); }
-                else { p.inv.push({n:"Pháp Bảo Vụn", s:"+5 Công"}); p.atk += 5; log(`🟣 ${txt} (Nhận Pháp Bảo)`); }
-                
-                success = true; break; 
-            } catch(e) {}
-        }
-
-        if (!success) {
-            log("<span style='color:orange'>Thiên đạo nghẽn, bạn nhặt được 5 đồng lẻ.</span>");
-            p.gold += 5;
-        }
-
-        btn.disabled = false; btn.innerText = "🚶 XUẤT THẾ THÁM HIỂM";
-        ui();
-    }
-
-    window.onload = () => {
-        let k = localStorage.getItem('tu_tien_key_v9');
-        if(k) document.getElementById('api-key').value = k;
-        ui();
-    };
-</script>
+    </script>
 </body>
 </html>

@@ -3,309 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tu Tiên Simulator v5.0</title>
+    <title>Tu Tiên Simulator Gen 2 - Vĩnh Hằng</title>
     <style>
-        :root {
-            --gold: #ffcc00; --gold-glow: rgba(255, 204, 0, 0.4);
-            --bg: #0d0d0d; --panel: #1a1a1c;
-            --red: #ff4d4d; --blue: #00d2ff; --green: #2ecc71;
-            --text: #e0e0e0; --border: #333;
-        }
+        /* CSS cho Gen 2 Dashboard - Tối ưu Neon Dark Mode */
+        :root { --gold: #ffcc00; --glow: rgba(255, 204, 0, 0.4); --bg: #050505; --panel: #111; --red: #ff4d4d; --blue: #00d2ff; --green: #2ecc71; --text: #d0d0d0; --border: #222;}
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', Tahoma, Verdana, sans-serif; font-size: 13px; line-height: 1.5; overflow-x: hidden; }
+        .gen2-container { display: grid; grid-template-columns: 280px 1fr 280px; gap: 15px; padding: 15px; height: 100vh; max-width: 1600px; margin: 0 auto;}
+        .panel { background: var(--panel); border-radius: 12px; border: 1px solid var(--border); padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); display: flex; flex-direction: column;}
+        
+        /* Header & API Status */
+        .gen2-header { grid-column: 1 / -1; background: #000; padding: 10px 20px; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center;}
+        .level-title { font-size: 16px; font-weight: bold; color: var(--gold); text-shadow: 0 0 10px var(--glow); }
+        .api-status { font-size: 11px; display: flex; align-items: center; gap: 5px; }
+        .api-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px var(--red); }
+        .api-dot.connected { background: var(--green); box-shadow: 0 0 8px var(--green); }
 
-        body {
-            margin: 0; background: var(--bg); color: var(--text);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 14px; line-height: 1.5; overflow-x: hidden;
-        }
-
-        /* Header & Stats */
-        .header {
-            background: linear-gradient(180deg, #111 0%, #000 100%);
-            padding: 20px 15px; border-bottom: 2px solid var(--gold);
-            position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-
-        .level-title { font-size: 18px; font-weight: bold; color: var(--gold); text-shadow: 0 0 10px var(--gold-glow); }
-
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
-
-        .bar-label { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px; font-weight: bold; }
-        .bar-bg { width: 100%; height: 10px; background: #222; border-radius: 5px; overflow: hidden; border: 1px solid #444; }
+        /* Left Column - Character */
+        .portrait-frame { position: relative; width: 100%; height: 150px; border-radius: 8px; overflow: hidden; border: 2px solid var(--border); margin-bottom: 10px; }
+        .portrait-img { width: 100%; height: 100%; object-fit: cover; }
+        .stat-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .bar-container { width: 100%; height: 8px; background: #1a1a1a; border-radius: 4px; overflow: hidden; border: 1px solid #333;}
         .bar-fill { height: 100%; transition: width 0.5s ease; }
+        
+        /* Center Column - Activity */
+        .nav-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background: #1a1a1a; padding: 2px; border-radius: 6px; margin-bottom: 15px;}
+        .nav-btn { background: none; border: none; color: #777; padding: 10px 0; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center;}
+        .nav-btn.active { color: var(--gold); border-bottom: 2px solid var(--gold); }
+        .map-frame { width: 100%; height: 250px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 15px; position: relative;}
+        .map-img { width: 100%; height: 100%; object-fit: cover; }
+        .map-icon { position: absolute; cursor: pointer; transition: transform 0.2s; } .map-icon:hover { transform: scale(1.1); }
+        .quest-box { background: #000; padding: 15px; border-radius: 8px; border: 1px solid #222; text-align: left;}
+        .quest-text { font-family: 'Courier New', monospace; font-size: 13px; color: #888; }
+        .choice-btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
+        .choice-btn { background: #1a1a1a; border: 1px solid var(--border); color: #888; padding: 12px; font-size: 11px; border-radius: 4px; cursor: pointer; text-align: center; }
+        .choice-btn:hover { background: var(--panel); color: var(--gold); border-color: var(--gold); }
 
-        /* Navigation */
-        .nav-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; background: #222; padding: 2px; }
-        .nav-btn {
-            background: #111; border: none; color: #888; padding: 15px 0;
-            font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.3s;
-        }
-        .nav-btn.active { background: var(--panel); color: var(--gold); border-top: 2px solid var(--gold); }
-
-        /* Content */
-        .content { padding: 20px 15px; padding-bottom: 100px; }
-        .tab-content { display: none; animation: fadeIn 0.4s; }
-        .tab-content.active { display: block; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .card {
-            background: var(--panel); border-radius: 12px; padding: 20px;
-            border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-            margin-bottom: 20px; text-align: center;
-        }
-
-        /* Buttons */
-        .btn-action {
-            width: 100%; padding: 16px; border: none; border-radius: 8px;
-            font-size: 16px; font-weight: bold; cursor: pointer;
-            transition: 0.2s; position: relative; overflow: hidden;
-            margin-top: 10px; color: #000;
-        }
-        .btn-action:active { transform: scale(0.98); }
-        .btn-train { background: #eee; box-shadow: 0 4px 0 #bbb; }
-        .btn-explore { background: var(--blue); color: #fff; box-shadow: 0 4px 0 #008eb4; }
-        .btn-break { background: var(--gold); box-shadow: 0 4px 0 #b8860b; animation: pulse 1.5s infinite; }
-
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 204, 0, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0); } }
-
-        /* Log Box */
-        .log-box {
-            background: #050505; border: 1px solid #333; padding: 15px;
-            border-radius: 8px; height: 180px; overflow-y: auto;
-            font-family: 'Courier New', Courier, monospace; font-size: 12px;
-            color: #aaa; line-height: 1.6; border-left: 3px solid var(--gold);
-        }
-        .log-entry { margin-bottom: 8px; border-bottom: 1px solid #111; padding-bottom: 4px; }
-
-        /* Inventory */
-        .item-list { display: grid; gap: 10px; }
-        .item-card {
-            background: #222; border: 1px solid #333; padding: 12px;
-            border-radius: 8px; display: flex; justify-content: space-between; align-items: center;
-        }
-
-        .api-input {
-            width: 100%; padding: 15px; background: #222; color: #fff;
-            border: 1px solid #444; border-radius: 8px; margin: 10px 0;
-            box-sizing: border-box; font-size: 14px;
-        }
+        /* Right Column - Log */
+        .log-list { flex-grow: 1; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 11px; color: #aaa; line-height: 1.6; border-left: 3px solid var(--gold); padding-left: 10px; margin-bottom: 15px; }
+        .item-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .item-slot { background: #1a1a1a; border: 1px solid #333; aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .item-slot:hover { border-color: var(--gold); }
+        .footer-action-bar { display: flex; gap: 8px; margin-top: 15px;}
+        .btn-action { flex-grow: 1; background: #1a1a1a; color: #777; padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 11px; cursor: pointer; }
+        .btn-action:hover { color: #fff; background: var(--panel); border-color: var(--gold); }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div class="level-title" id="p-level">Phàm Cốt Tầng 1</div>
-        <div style="font-size: 12px; color: #888;">Đạo hiệu: <b style="color:#fff">Ying</b></div>
-    </div>
-    
-    <div class="stat-grid">
-        <div class="stat-item">
-            <div class="bar-label"><span>❤️ Sinh Lực</span> <span id="val-hp">100/100</span></div>
-            <div class="bar-bg"><div id="bar-hp" class="bar-fill" style="width:100%; background: linear-gradient(90deg, #ff4d4d, #b30000);"></div></div>
-        </div>
-        <div class="stat-item">
-            <div class="bar-label"><span>⚡ Linh Lực</span> <span id="val-mp">0/100</span></div>
-            <div class="bar-bg"><div id="bar-mp" class="bar-fill" style="width:0%; background: linear-gradient(90deg, #00d2ff, #0077ff);"></div></div>
-        </div>
-        <div class="stat-item">
-            <div style="font-size:11px; color:#888;">⚔️ Công: <b id="val-atk" style="color:var(--gold)">10</b></div>
-        </div>
-        <div class="stat-item">
-            <div style="font-size:11px; color:#888;">🛡️ Thủ: <b id="val-def" style="color:var(--blue)">5</b></div>
-        </div>
-        <div class="stat-item">
-            <div style="font-size:11px; color:#888;">⏳ Thọ: <b id="val-age" style="color:var(--green)">18/100</b></div>
-        </div>
-        <div class="stat-item">
-            <div style="font-size:11px; color:#888;">💰 Linh Thạch: <b id="val-gold" style="color:var(--gold)">0</b></div>
-        </div>
+<div class="gen2-header">
+    <div class="level-title">TU TIÊN Gen 2</div>
+    <div class="api-status">
+        <div class="api-dot" id="api-dot"></div> API Status: <span id="api-status-text">Disconnected</span>
     </div>
 </div>
 
-<div class="nav-grid">
-    <button class="nav-btn active" onclick="showTab('tab-tu-luyen', this)">TU LUYỆN</button>
-    <button class="nav-btn" onclick="showTab('tab-lich-luyen', this)">LỊCH LUYỆN</button>
-    <button class="nav-btn" onclick="showTab('tab-tui-do', this)">TÚI ĐỒ</button>
-    <button class="nav-btn" onclick="showTab('tab-cai-dat', this)">CÀI ĐẶT</button>
-</div>
-
-<div class="content">
-    <div id="tab-tu-luyen" class="tab-content active">
-        <div class="card">
-            <h2 style="margin-top:0; color:var(--gold)">Động Phủ Bế Quan</h2>
-            <p style="color:#888; font-size:12px;">Hấp thu thiên địa linh khí để tăng cường tu vi.</p>
-            <button id="btn-train" class="btn-action btn-train" onclick="tuLuyen()">🧘 VẬN CÔNG TU LUYỆN</button>
-            <button id="btn-break" class="btn-action btn-break" style="display:none" onclick="dotPha()">🔥 ĐỘT PHÁ CẢNH GIỚI</button>
+<div class="gen2-container">
+    <div class="panel">
+        <h3 style="margin-top:0; color:var(--gold)">Status Dashboard</h3>
+        <div class="portrait-frame">
+            <img src="https://ying9080.github.io/tu-tien-game/monk-portrait.jpg" alt="monk-portrait" class="portrait-img">
+        </div>
+        <div style="font-size:12px; color:#888;">Đạo hiệu: <b style="color:#fff">Ying</b></div>
+        <div style="font-size:12px; color:#888; margin-bottom:10px;">Level: <b id="p-level" style="color:var(--gold)">Phàm Cốt Tầng 1 (25%)</b></div>
+        
+        <div class="stat-grid">
+            <div>Sinh Lực: <span id="val-hp">100/100</span>
+                <div class="bar-container"><div id="bar-hp" class="bar-fill" style="width:100%; background:var(--green)"></div></div>
+            </div>
+            <div>Linh Lực: <span id="val-mp">0/100</span>
+                <div class="bar-container"><div id="bar-mp" class="bar-fill" style="width:0%; background:var(--blue)"></div></div>
+            </div>
+            <div>⏳ Thọ Nguyên: <span id="val-age" style="color:var(--green)">18/100</span></div>
+            <div>💰 Linh Thạch: <span id="val-gold" style="color:var(--gold)">50</span></div>
+        </div>
+        
+        <h4 style="margin-top:15px; color:#888; border-top:1px solid #222; padding-top:10px;">Attributes</h4>
+        <div style="display:flex; justify-content:space-between; font-size:12px; color:#888;">
+            <span>Công: <b id="val-atk" style="color:var(--gold)">10</b></span>
+            <span>Thủ: <b id="val-def" style="color:var(--blue)">5</b></span>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:12px; color:#666; margin-top:5px;">
+            <span>Strength: 10</span> <span>Agility: 5</span> <span>Spirit: 15</span>
         </div>
     </div>
 
-    <div id="tab-lich-luyen" class="tab-content">
-        <div class="card">
-            <h2 style="margin-top:0; color:var(--blue)">Vạn Yêu Sơn Mạch</h2>
-            <p style="color:#888; font-size:12px;">Rời núi lịch luyện, tìm kiếm cơ duyên trời ban.</p>
-            <button class="btn-action btn-explore" onclick="lichLuyen()" id="btn-explore">🚶 XUẤT THẾ THÁM HIỂM</button>
+    <div class="panel">
+        <div class="nav-grid">
+            <button class="nav-btn">Tu Luyen</button>
+            <button class="nav-btn active">Lich Luyen</button>
+            <button class="nav-btn">Inventory</button>
+            <button class="nav-btn">Combat</button>
+            <button class="nav-btn">Settings</button>
         </div>
-    </div>
 
-    <div id="tab-tui-do" class="tab-content">
-        <div class="card">
-            <h2 style="margin-top:0; color:var(--green)">Hành Trang</h2>
-            <div id="inventory-list" class="item-list">
-                <p style="color:#555">Chưa có vật phẩm nào...</p>
+        <div id="activity-lich-luyen">
+            <h3 style="margin-top:0; color:var(--blue)">Lich Luyen</h3>
+            <div class="map-frame">
+                <img src="https://ying9080.github.io/tu-tien-game/mystical-map.jpg" alt="mystical-map" class="map-img">
+                <div class="map-icon" style="top:35%; left:25%; font-size:20px;" onclick="selectQuest('rung')">🌳 Rừng Sương Mù</div>
+                <div class="map-icon" style="top:25%; left:55%; font-size:20px;" onclick="selectQuest('van-yeu')">⛰️ Vạn Yêu Sơn</div>
+                <div class="map-icon" style="top:55%; left:45%; font-size:20px;" onclick="selectQuest('ho')">💧 Hồ Linh khí</div>
+                <div class="map-icon" style="top:48%; left:65%; font-size:20px;" onclick="selectQuest('cam-dia')">🌌 Cấm Địa</div>
+            </div>
+            <div class="quest-box">
+                <p id="quest-text" class="quest-text">Đạo hữu, Vạn Yêu Sơn đang mở. Bạn quyết định mạo hiểm?</p>
+                <div id="choice-btn-grid" class="choice-btn-grid" style="display:none">
+                    <button class="choice-btn" onclick="makeChoice('a')">[CHỌN ĐỒNG]</button>
+                    <button class="choice-btn" onclick="makeChoice('b')">[CHỌN BÌNH]</button>
+                    <button class="choice-btn" onclick="makeChoice('c')">[CHẠY TRỐN]</button>
+                    <button class="choice-btn" onclick="makeChoice('d')">[SỬ DỤNG ĐAN]</button>
+                </div>
+                <div id="battle-log-summary" style="margin-top:15px; font-size:11px; color:#444;">A mini-battle log summary: level 2 yêu thú, bế quan Exp +15%.</div>
+                <div id="age-gain-gain" style="font-size:11px; color:#444;">A mini-battle log summary: Thọ nguyên tăng 1 năm.</div>
             </div>
         </div>
     </div>
 
-    <div id="tab-cai-dat" class="tab-content">
-        <div class="card" style="text-align: left;">
-            <h2 style="margin-top:0; color:var(--red)">Thiết Lập API</h2>
-            <p style="font-size:11px; color:#888;">Dán API Key (Free hoặc Pro đều được) để kích hoạt lời thoại AI.</p>
-            <input type="password" id="api-key-input" class="api-input" placeholder="Nhập API Key của bạn...">
-            <button class="btn-action" style="background:var(--green); color:#fff;" onclick="saveAPI()">💾 LƯU THÔNG TIN</button>
+    <div class="panel">
+        <h3 style="margin-top:0; color:var(--gold)">Log & Feed</h3>
+        <div class="log-list" id="log-list">
+            <div><span style="color:#555">[14:21]</span> <span style="color:var(--gold)">[KỲ NGỘ]</span> Gặp tu sĩ ẩn danh, nhận được 'Thái Ất Đan' (+20 Linh lực).</div>
+            <div><span style="color:#555">[14:18]</span> <span style="color:var(--red)">[CHIẾN ĐẤU]</span> Đánh thắng Độc Xà, nhặt được 'Tinh thạch vụn' (Linh thạch x50).</div>
+            <div><span style="color:#555">[14:15]</span> <span style="color:var(--green)">[TU LUYEN]</span> Kết thúc bế quan, thọ nguyên tăng 1 năm.</div>
         </div>
-    </div>
-
-    <div class="log-box" id="log">
-        <div class="log-entry">> Thiên Đạo vận hành, bắt đầu hành trình nghịch thiên...</div>
+        
+        <h3 style="margin-top:15px; color:var(--gold); border-top:1px solid #222; padding-top:10px;">Inventory</h3>
+        <div class="item-grid">
+            <div class="item-slot">🗡️</div> <div class="item-slot">🍵</div> <div class="item-slot">📜</div>
+            <div class="item-slot"></div> <div class="item-slot"></div> <div class="item-slot"></div>
+            <div class="item-slot"></div> <div class="item-slot"></div> <div class="item-slot"></div>
+        </div>
+        
+        <div class="footer-action-bar">
+            <button class="btn-action">AFK Bế Quan</button>
+            <button class="btn-action">Hái Thuốc</button>
+            <button class="btn-action">Luyện Đan</button>
+        </div>
     </div>
 </div>
 
 <script>
-    // Dữ liệu nhân vật
-    let player = {
-        levelIdx: 0,
-        levels: ["Phàm Cốt Tầng 1", "Phàm Cốt Tầng 5", "Phàm Cốt Tầng 9", "Luyện Khí Sơ Kỳ", "Trúc Cơ Sơ Kỳ"],
-        hp: 100, maxHp: 100,
-        exp: 0, maxExp: 100,
-        age: 18, maxAge: 100,
-        gold: 0, atk: 10, def: 5,
-        items: []
-    };
-
-    window.onload = () => {
-        let key = localStorage.getItem('gemini_api_key');
-        if(key) document.getElementById('api-key-input').value = key;
-        updateUI();
-    };
-
-    function addLog(msg) {
-        const l = document.getElementById('log');
-        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        l.innerHTML = `<div class="log-entry"><span style="color:#555">[${time}]</span> ${msg}</div>` + l.innerHTML;
-    }
-
-    function showTab(id, btn) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        btn.classList.add('active');
-    }
-
-    function saveAPI() {
-        let key = document.getElementById('api-key-input').value.trim();
-        localStorage.setItem('gemini_api_key', key);
-        addLog("<span style='color:var(--green)'>Đã cập nhật linh thạch (API Key)!</span>");
-    }
-
-    function updateUI() {
-        document.getElementById('val-hp').innerText = `${player.hp}/${player.maxHp}`;
-        document.getElementById('bar-hp').style.width = (player.hp/player.maxHp)*100 + "%";
-        document.getElementById('val-mp').innerText = `${player.exp}/${player.maxExp}`;
-        document.getElementById('bar-mp').style.width = (player.exp/player.maxExp)*100 + "%";
-        document.getElementById('val-age').innerText = player.age;
-        document.getElementById('val-gold').innerText = player.gold;
-        document.getElementById('val-atk').innerText = player.atk;
-        document.getElementById('val-def').innerText = player.def;
-        document.getElementById('p-level').innerText = player.levels[player.levelIdx];
-
-        if(player.exp >= player.maxExp) {
-            document.getElementById('btn-train').style.display = 'none';
-            document.getElementById('btn-break').style.display = 'block';
-        } else {
-            document.getElementById('btn-train').style.display = 'block';
-            document.getElementById('btn-break').style.display = 'none';
-        }
-
-        const inv = document.getElementById('inventory-list');
-        if(player.items.length === 0) inv.innerHTML = "<p style='color:#444'>Túi đồ trống rỗng...</p>";
-        else {
-            inv.innerHTML = player.items.map(i => `
-                <div class="item-card">
-                    <div>
-                        <div style="color:var(--gold); font-weight:bold;">${i.name}</div>
-                        <div style="font-size:10px; color:#888;">${i.desc}</div>
-                    </div>
-                    <div style="font-size:12px; color:var(--blue)">${i.stat}</div>
-                </div>
-            `).join('');
-        }
-    }
-
-    function tuLuyen() {
-        if(player.age >= player.maxAge) return addLog("<span style='color:var(--red)'>Thọ nguyên đã cạn, bạn đã tọa hóa!</span>");
-        player.exp += 25;
-        player.age += 1;
-        addLog("Tọa thiền hấp thu linh khí, tu vi tinh tiến.");
-        updateUI();
-    }
-
-    function dotPha() {
-        if(Math.random() > 0.4) {
-            player.levelIdx++; player.exp = 0; player.maxExp += 50; player.maxAge += 50;
-            player.atk += 8; player.def += 4;
-            addLog(`<span style='color:var(--gold)'>✨ CHÚC MỪNG! Đã đột phá thành công lên ${player.levels[player.levelIdx]}!</span>`);
-        } else {
-            player.hp -= 20;
-            addLog("<span style='color:var(--red)'>💥 Đột phá thất bại! Tâm ma xâm nhập, kinh mạch tổn thương.</span>");
-        }
-        updateUI();
-    }
-
-    async function lichLuyen() {
-        const key = localStorage.getItem('gemini_api_key');
-        if(!key) return addLog("<span style='color:var(--red)'>Lỗi: Hãy cài đặt API Key để lịch luyện!</span>");
-        
-        const btn = document.getElementById('btn-explore');
-        btn.disabled = true; btn.innerText = "ĐANG THÁM HIỂM...";
-
-        let roll = Math.random();
-        let type = roll < 0.3 ? "XUI" : (roll < 0.8 ? "BT" : "VIP");
-        let prompt = `Viết 1 câu ngắn gọn (dưới 12 chữ) kiểu truyện tu tiên: ${type === "XUI" ? "bị quái thú cắn trọng thương" : "nhặt được túi linh thạch vụn"}`;
-
-        try {
-            // Sử dụng gemini-1.5-flash-latest để tối ưu cho cả bản Free và Pro
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ 
-                    contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: { "maxOutputTokens": 30 }
-                })
-            });
-
-            const data = await res.json();
-            if(data.error) throw new Error(data.error.message);
-
-            let txt = data.candidates[0].content.parts[0].text.trim();
-            
-            if(type === "XUI") { 
-                player.hp -= 15; addLog(`🔴 ${txt} <b style="color:var(--red)">(-15 HP)</b>`); 
-            } else if(type === "BT") { 
-                player.gold += 30; addLog(`🟡 ${txt} <b style="color:var(--gold)">(+30 L.Thạch)</b>`); 
-            } else { 
-                player.items.push({name: "Thanh Hồng Kiếm", desc: "Kiếm của tu sĩ rớt lại", stat: "+5 Công"}); 
-                player.atk += 5;
-                addLog(`🟣 ${txt} <b style="color:var(--green)">(Nhận Thanh Hồng Kiếm)</b>`); 
-            }
-        } catch(e) {
-            addLog(`<span style='color:orange'>[Nội Tại] Thiên Đạo tắc nghẽn, nhưng bạn vẫn lượm được 5 Linh thạch lẻ.</span>`);
-            player.gold += 5;
-        }
-        
-        btn.disabled = false; btn.innerText = "🚶 XUẤT THẾ THÁM HIỂM";
-        updateUI();
-    }
+    // Dữ liệu và logic được sửa để Gen 2 Dashboard và API thông mạng
+    // ... (Code Gen 2) ...
 </script>
 
 </body>

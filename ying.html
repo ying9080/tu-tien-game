@@ -3,39 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tu Tiên Simulator v3.0 - Đạo & Đời</title>
+    <title>Tu Tiên Simulator v4.0</title>
     <style>
         :root { --gold: #ff9800; --bg: #000; --panel: #1a1a1a; --red: #ff4444; --blue: #2196f3; --green: #4caf50;}
         body { margin: 0; background: #121212; color: #fff; font-family: sans-serif; font-size: 14px; user-select: none; }
-        
-        /* Header */
-        .header { background: var(--bg); padding: 15px; border-bottom: 2px solid #333; position: sticky; top: 0; }
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 12px; margin-top: 5px; }
+        .header { background: var(--bg); padding: 15px; border-bottom: 2px solid #333; position: sticky; top: 0; z-index: 100;}
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; margin-top: 5px; }
         .bar-container { width: 100%; height: 8px; background: #333; border-radius: 4px; overflow: hidden; margin-top: 2px; }
         .bar-fill { height: 100%; transition: width 0.3s; }
-
-        /* Navigation */
-        .nav-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 5px; background: #000; }
-        .nav-btn { background: #2a2a2a; border: none; color: #fff; padding: 12px 0; font-size: 12px; border-radius: 4px; font-weight: bold;}
+        .nav-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 5px; background: #000; }
+        .nav-btn { background: #2a2a2a; border: none; color: #fff; padding: 12px 0; font-size: 11px; border-radius: 4px; font-weight: bold;}
         .nav-btn.active { background: var(--gold); color: #000; }
-
-        /* Content */
-        .content { padding: 15px; min-height: 400px; }
+        .content { padding: 15px; min-height: 400px; padding-bottom: 80px; }
         .tab-content { display: none; }
         .active { display: block; }
         .panel { background: var(--panel); border-radius: 10px; padding: 15px; border: 1px solid #333; text-align: center; margin-bottom: 15px;}
-
-        /* Nút bấm */
         .btn-action { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; margin-top: 10px; cursor: pointer; color: #000; }
-        .btn-train { background: #fff; }
-        .btn-break { background: var(--gold); display: none; }
-        .btn-explore { background: var(--blue); color: #fff; }
-
-        /* Log & Input */
-        .log-box { background: #000; border: 1px solid var(--gold); padding: 10px; border-radius: 8px; height: 150px; overflow-y: auto; font-size: 13px; color: #d4af37; line-height: 1.4; text-align: left; }
-        .api-input { width: 100%; padding: 10px; background: #333; color: white; border: 1px solid #555; border-radius: 5px; margin-bottom: 10px; box-sizing: border-box; }
-        
-        .loading { font-style: italic; color: #aaa; }
+        .log-box { background: #000; border: 1px solid var(--gold); padding: 10px; border-radius: 8px; height: 150px; overflow-y: auto; font-size: 13px; color: #d4af37; line-height: 1.4; text-align: left; margin-top: 10px;}
+        .item-slot { background: #222; border: 1px solid #444; padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+        .api-input { width: 100%; padding: 12px; background: #333; color: white; border: 1px solid #555; border-radius: 5px; margin-bottom: 10px; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -51,72 +37,77 @@
         <div>⚡ Linh Lực: <span id="val-mp">0/100</span>
             <div class="bar-container"><div id="bar-mp" class="bar-fill" style="width:0%; background:var(--blue)"></div></div>
         </div>
-        <div>⏳ Thọ Nguyên: <span id="val-age" style="color:var(--green)">18/100</span> tuổi</div>
-        <div>💰 Linh Thạch: <span id="val-gold" style="color:var(--gold)">0</span></div>
+        <div>⚔️ Công: <span id="val-atk" style="color:var(--gold)">10</span> | 🛡️ Thủ: <span id="val-def" style="color:var(--blue)">5</span></div>
+        <div>⏳ Thọ: <span id="val-age" style="color:var(--green)">18/100</span> | 💰 Linh Thạch: <span id="val-gold" style="color:var(--gold)">0</span></div>
     </div>
 </div>
 
 <div class="nav-grid">
     <button class="nav-btn active" onclick="showTab('tab-tu-luyen', this)">Tu Luyện</button>
     <button class="nav-btn" onclick="showTab('tab-lich-luyen', this)">Lịch Luyện</button>
-    <button class="nav-btn" onclick="showTab('tab-cai-dat', this)">Thiết Lập AI</button>
+    <button class="nav-btn" onclick="showTab('tab-tui-do', this)">Túi Đồ</button>
+    <button class="nav-btn" onclick="showTab('tab-cai-dat', this)">Cài Đặt</button>
 </div>
 
 <div class="content">
     <div id="tab-tu-luyen" class="tab-content active">
         <div class="panel">
-            <h3>Bế Quan Tu Luyện</h3>
-            <p style="font-size: 12px; color: #aaa;">Mỗi lần tu luyện tiêu hao 1 năm tuổi thọ.</p>
-            <button id="btn-train" class="btn-action btn-train" onclick="tuLuyen()">🧘 VẬN CÔNG HẤP THU</button>
-            <button id="btn-break" class="btn-action btn-break" onclick="dotPha()">🔥 ĐỘT PHÁ BÌNH CẢNH (Tỷ lệ 50%)</button>
+            <h3>Bế Quan</h3>
+            <button id="btn-train" class="btn-action" style="background:#fff" onclick="tuLuyen()">🧘 VẬN CÔNG (+25 EXP)</button>
+            <button id="btn-break" class="btn-action" style="background:var(--gold); display:none" onclick="dotPha()">🔥 ĐỘT PHÁ</button>
         </div>
     </div>
 
     <div id="tab-lich-luyen" class="tab-content">
         <div class="panel">
             <h3 style="color: var(--blue)">Vạn Yêu Sơn Mạch</h3>
-            <p style="font-size: 12px; color: #aaa;">Rời núi thám hiểm, tìm kiếm cơ duyên. Cẩn thận mất mạng!</p>
-            <button class="btn-action btn-explore" onclick="lichLuyen()" id="btn-explore">🚶 THÁM HIỂM (Cần kết nối AI)</button>
+            <button class="btn-action" style="background:var(--blue); color:#fff" onclick="lichLuyen()" id="btn-explore">🚶 THÁM HIỂM (GỌI AI)</button>
+        </div>
+    </div>
+
+    <div id="tab-tui-do" class="tab-content">
+        <div class="panel">
+            <h3>Hành Trang</h3>
+            <div id="inventory-list">
+                <p style="color:#666">Trống rỗng...</p>
+            </div>
         </div>
     </div>
 
     <div id="tab-cai-dat" class="tab-content">
         <div class="panel" style="text-align: left;">
-            <h3 style="color: var(--gold); margin-top: 0;">Kết nối Thiên Đạo (Gemini API)</h3>
-            <p style="font-size: 12px;">Dán API Key của Google vào đây để hệ thống tự động tạo ra các câu chuyện Kỳ Ngộ sinh động. Dữ liệu lưu an toàn trên máy bạn.</p>
-            <input type="text" id="api-key-input" class="api-input" placeholder="Nhập API Key bắt đầu bằng AIzaSy...">
-            <button class="btn-action" style="background: var(--green); color: white;" onclick="saveAPI()">💾 LƯU API KEY</button>
+            <h3>Cài Đặt Gemini API</h3>
+            <input type="password" id="api-key-input" class="api-input" placeholder="Dán API Key vào đây...">
+            <button class="btn-action" style="background: var(--green); color: white;" onclick="saveAPI()">💾 LƯU LINH THẠCH</button>
+            <p style="font-size: 10px; color:#888; margin-top:10px;">* Lưu ý: API Key của bạn chỉ được lưu trên trình duyệt này.</p>
         </div>
     </div>
 
     <div class="log-box" id="log">
-        <div>> Kính chào đạo hữu bước vào con đường nghịch thiên!</div>
+        <div>> Hệ thống V4.0 đã sẵn sàng.</div>
     </div>
 </div>
 
 <script>
-    // Dữ liệu người chơi
     let player = {
         levelIdx: 0,
-        levels: ["Phàm Cốt Tầng 1", "Phàm Cốt Tầng 5", "Phàm Cốt Tầng 9", "Luyện Khí Tầng 1 (Đột phá)"],
-        hp: 100, maxHp: 100,
-        exp: 0, maxExp: 100,
-        age: 18, maxAge: 100,
-        gold: 0
+        levels: ["Phàm Cốt Tầng 1", "Phàm Cốt Tầng 5", "Phàm Cốt Tầng 9", "Luyện Khí Tầng 1", "Trúc Cơ Sơ Kỳ"],
+        hp: 100, maxHp: 100, exp: 0, maxExp: 100, age: 18, maxAge: 100, gold: 0,
+        atk: 10, def: 5, items: []
     };
 
-    // Load API Key khi mở game
-    window.onload = function() {
-        let savedKey = localStorage.getItem('gemini_api_key');
-        if(savedKey) {
-            document.getElementById('api-key-input').value = savedKey;
-            addLog("Đã kết nối thành công với Thiên Đạo (Đã nạp API Key).");
+    window.onload = () => {
+        let key = localStorage.getItem('gemini_api_key');
+        if(key) {
+            document.getElementById('api-key-input').value = key;
+            addLog("<span style='color:var(--green)'>Thiên Đạo đã nhận diện API Key.</span>");
         }
-    }
+        updateUI();
+    };
 
     function addLog(msg) {
         const l = document.getElementById('log');
-        l.innerHTML = `<div style="margin-bottom: 5px;">> ${msg}</div>` + l.innerHTML;
+        l.innerHTML = `<div>> ${msg}</div>` + l.innerHTML;
     }
 
     function showTab(id, btn) {
@@ -128,141 +119,94 @@
 
     function saveAPI() {
         let key = document.getElementById('api-key-input').value;
-        if(key.trim() === "") {
-            addLog("<span style='color:red'>API Key không được để trống!</span>");
-            return;
-        }
         localStorage.setItem('gemini_api_key', key);
-        addLog("<span style='color:var(--green)'>Đã lưu API Key! Hệ thống Lịch Luyện đã sẵn sàng.</span>");
-    }
-
-    // --- LOGIC TU LUYỆN ---
-    function tuLuyen() {
-        if(player.exp >= player.maxExp) return;
-        
-        player.age += 1; // Mất 1 năm tuổi thọ
-        player.exp += 25; // Tăng exp
-        
-        if(player.age >= player.maxAge) {
-            addLog("<span style='color:red'>HẾT THỌ NGUYÊN! Đạo hữu đã tọa hóa. (Game Over - Hãy reload web để chơi lại)</span>");
-            document.getElementById('btn-train').disabled = true;
-            return;
-        }
-
-        if(player.exp >= player.maxExp) {
-            player.exp = player.maxExp;
-            document.getElementById('btn-train').style.display = 'none';
-            document.getElementById('btn-break').style.display = 'block';
-            addLog("Linh khí đã Đạt <b style='color:var(--gold)'>Viên Mãn</b>! Mau đột phá!");
-        } else {
-            addLog(`Tọa thiền 1 năm, linh lực tăng lên. Thọ nguyên còn ${player.maxAge - player.age} năm.`);
-        }
-        updateUI();
-    }
-
-    function dotPha() {
-        let rng = Math.random();
-        if(rng <= 0.5) { // Tỷ lệ thành công 50%
-            player.levelIdx++;
-            player.exp = 0;
-            player.maxExp += 50;
-            player.maxAge += 50; // Tăng tuổi thọ khi đột phá
-            addLog(`<span style="color:var(--green)">⚡ Đột Phá Thành Công lên ${player.levels[player.levelIdx]}! Thọ nguyên tăng mạnh!</span>`);
-            document.getElementById('btn-train').style.display = 'block';
-            document.getElementById('btn-break').style.display = 'none';
-        } else {
-            player.hp -= 30; // Phạt tụt máu
-            addLog("<span style='color:red'>❌ Đột Phá Thất Bại! Kinh mạch chấn động, mất 30 HP.</span>");
-            if(player.hp <= 0) {
-                addLog("<span style='color:red'>Đạo hữu đã bạo thể mà chết...</span>");
-            }
-        }
-        updateUI();
-    }
-
-    // --- LOGIC LỊCH LUYỆN (LAI AI) ---
-    async function lichLuyen() {
-        const apiKey = localStorage.getItem('gemini_api_key');
-        if(!apiKey) {
-            alert("Vui lòng vào tab THIẾT LẬP AI để nhập API Key trước!");
-            return;
-        }
-
-        let btn = document.getElementById('btn-explore');
-        btn.disabled = true;
-        btn.innerText = "ĐANG TÌM CƠ DUYÊN...";
-        addLog("<span class='loading'>Đang tiến vào Vạn Yêu Sơn Mạch...</span>");
-
-        // Hardcode: Quyết định ngẫu nhiên loại sự kiện và phần thưởng trước
-        let roll = Math.random();
-        let promptHardcode = "";
-        let effectMsg = "";
-
-        if(roll < 0.3) {
-            // Xui xẻo: Gặp quái thú mạnh
-            promptHardcode = "Hãy viết 1 câu (dưới 30 chữ) tả cảnh người chơi bị một con quái thú tấn công vỡ nát phòng ngự.";
-            effectMsg = "<span style='color:red'>[-20 HP] Trọng thương!</span>";
-            player.hp -= 20;
-        } else if (roll < 0.8) {
-            // Bình thường: Nhặt được đồ
-            promptHardcode = "Hãy viết 1 câu (dưới 30 chữ) tả cảnh người chơi tiêu diệt một con yêu thú nhỏ và moi được tinh thạch.";
-            effectMsg = "<span style='color:var(--gold)'>[+50 Linh Thạch] Thu hoạch khá!</span>";
-            player.gold += 50;
-        } else {
-            // Jackpot: Cơ duyên lớn
-            promptHardcode = "Hãy viết 1 câu (dưới 30 chữ) tả cảnh người chơi lọt vào một hang động phát sáng và uống được linh tuyền.";
-            effectMsg = "<span style='color:var(--blue)'>[+100 Linh Lực] May mắn ngút trời!</span>";
-            player.exp += 100;
-            if(player.exp > player.maxExp) player.exp = player.maxExp; // Báo bình cảnh
-        }
-
-        // Gọi AI để tạo "lớp da" cốt truyện dựa trên bộ khung vừa chọn
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-        
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: "Ngươi là hệ thống của game tu tiên. " + promptHardcode }] }]
-                })
-            });
-            const data = await response.json();
-            
-            // Xóa chữ "loading"
-            let logBox = document.getElementById('log');
-            logBox.removeChild(logBox.firstElementChild);
-
-            // In kết quả
-            let aiText = data.candidates[0].content.parts[0].text.trim();
-            addLog(`<i>"${aiText}"</i><br>${effectMsg}`);
-
-        } catch(e) {
-            addLog("<span style='color:red'>Lỗi kết nối Thiên Đạo! (Kiểm tra lại mạng hoặc API Key)</span>");
-        }
-
-        updateUI();
-        btn.disabled = false;
-        btn.innerText = "🚶 THÁM HIỂM (Cần kết nối AI)";
+        addLog("Đã lưu API Key mới!");
     }
 
     function updateUI() {
         document.getElementById('val-hp').innerText = `${player.hp}/${player.maxHp}`;
-        document.getElementById('bar-hp').style.width = Math.max(0, (player.hp/player.maxHp)*100) + "%";
-        
+        document.getElementById('bar-hp').style.width = (player.hp/player.maxHp)*100 + "%";
         document.getElementById('val-mp').innerText = `${player.exp}/${player.maxExp}`;
-        document.getElementById('bar-mp').style.width = Math.max(0, (player.exp/player.maxExp)*100) + "%";
-        
-        document.getElementById('val-age').innerText = `${player.age}/${player.maxAge}`;
+        document.getElementById('bar-mp').style.width = (player.exp/player.maxExp)*100 + "%";
+        document.getElementById('val-age').innerText = player.age;
         document.getElementById('val-gold').innerText = player.gold;
-        document.getElementById('p-level').innerText = player.levels[player.levelIdx] || "Đại Đạo Đỉnh Phong";
+        document.getElementById('val-atk').innerText = player.atk;
+        document.getElementById('val-def').innerText = player.def;
+        document.getElementById('p-level').innerText = player.levels[player.levelIdx];
 
-        if(player.exp >= player.maxExp && player.levelIdx < player.levels.length - 1) {
+        if(player.exp >= player.maxExp) {
             document.getElementById('btn-train').style.display = 'none';
             document.getElementById('btn-break').style.display = 'block';
+        } else {
+            document.getElementById('btn-train').style.display = 'block';
+            document.getElementById('btn-break').style.display = 'none';
+        }
+        
+        // Cập nhật túi đồ
+        const inv = document.getElementById('inventory-list');
+        if(player.items.length === 0) inv.innerHTML = "<p style='color:#666'>Trống rỗng...</p>";
+        else {
+            inv.innerHTML = player.items.map(i => `<div class="item-slot"><span>${i.name}</span> <small>${i.type}</small></div>`).join('');
         }
     }
-</script>
 
+    function tuLuyen() {
+        if(player.age >= player.maxAge) return addLog("Đã hết thọ nguyên!");
+        player.exp += 25;
+        player.age += 1;
+        addLog("Tu luyện 1 năm, linh lực tăng tiến.");
+        updateUI();
+    }
+
+    function dotPha() {
+        if(Math.random() > 0.4) {
+            player.levelIdx++; player.exp = 0; player.maxExp += 50; player.maxAge += 20;
+            player.atk += 5; player.def += 3;
+            addLog(`<span style='color:var(--green)'>Đột phá thành công lên ${player.levels[player.levelIdx]}!</span>`);
+        } else {
+            player.hp -= 20; addLog("<span style='color:red'>Đột phá thất bại, kinh mạch bị thương!</span>");
+        }
+        updateUI();
+    }
+
+    async function lichLuyen() {
+        const key = localStorage.getItem('gemini_api_key');
+        if(!key) return addLog("Lỗi: Chưa nhập API Key!");
+        
+        const btn = document.getElementById('btn-explore');
+        btn.disabled = true; btn.innerText = "ĐANG GỌI THIÊN ĐẠO...";
+
+        let roll = Math.random();
+        let type = roll < 0.3 ? "XUI" : (roll < 0.8 ? "BT" : "VIP");
+        let prompt = `Viết 1 câu tu tiên cực ngắn (10 chữ) về việc: ${type === "XUI" ? "bị quái đánh" : "nhặt được tiền"}`;
+
+        try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+
+            const data = await res.json();
+            if(data.error) throw new Error(data.error.message);
+
+            let txt = data.candidates[0].content.parts[0].text;
+            if(type === "XUI") { player.hp -= 15; addLog(`🔴 ${txt} (-15 HP)`); }
+            else if(type === "BT") { player.gold += 30; addLog(`🟡 ${txt} (+30 L.Thạch)`); }
+            else { 
+                player.items.push({name: "Kiếm Gỗ", type: "Vũ Khí"}); 
+                player.atk += 2;
+                addLog(`🟣 ${txt} (Nhận Kiếm Gỗ +2 Công)`); 
+            }
+        } catch(e) {
+            addLog(`<span style='color:red'>Thiên Đạo từ chối: ${e.message.substring(0,30)}...</span>`);
+            addLog("<i>Nhưng bạn vẫn nhặt được 5 Linh Thạch lẻ.</i>");
+            player.gold += 5;
+        }
+        
+        btn.disabled = false; btn.innerText = "🚶 THÁM HIỂM (GỌI AI)";
+        updateUI();
+    }
+</script>
 </body>
 </html>

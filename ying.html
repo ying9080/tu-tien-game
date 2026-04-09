@@ -37,3 +37,139 @@
         #log { background: #000; border: 1px solid #222; padding: 15px; border-radius: 10px; flex-grow: 1; overflow-y: auto; font-family: 'Georgia', serif; font-size: 14px; color: #bbb; line-height: 1.6; border-left: 4px solid #ffcc00; }
         .log-entry { margin-bottom: 12px; animation: slideIn 0.3s ease-out; }
         @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        .item-box { background: #1a1a1a; padding: 10px; border-radius: 6px; margin-bottom: 5px; display: flex; justify-content: space-between; border: 1px solid #333; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="lv-title" id="ui-lv">Phàm Cốt Tầng 1</div>
+    <div class="stats-grid">
+        <div>❤️ Máu: <span id="ui-hp-t">100/100</span><div class="bar-bg"><div id="ui-hp-b" class="bar-fill" style="background:#ff4d4d; width:100%"></div></div></div>
+        <div>⚡ Linh Lực: <span id="ui-ex-t">0/100</span><div class="bar-bg"><div id="ui-ex-b" class="bar-fill" style="background:#00d2ff; width:0%"></div></div></div>
+    </div>
+    <div style="display:flex; justify-content:space-between; font-size:10px; color:#888; margin-top:8px;">
+        <span>⚔️ Công: <b id="ui-atk" style="color:#ffcc00">10</b></span>
+        <span>🛡️ Thủ: <b id="ui-def" style="color:#00d2ff">5</b></span>
+        <span>💰 Linh Thạch: <b id="ui-gold" style="color:#ffcc00">0</b></span>
+    </div>
+</header>
+
+<nav>
+    <button class="m-btn active" onclick="tab('t-tu',this)">TU LUYỆN</button>
+    <button class="m-btn" onclick="tab('t-di',this)">LỊCH LUYỆN</button>
+    <button class="m-btn" onclick="tab('t-kho',this)">TÚI ĐỒ</button>
+    <button class="m-btn" onclick="tab('t-set',this)">CÀI ĐẶT</button>
+</nav>
+
+<main>
+    <div id="t-tu" class="tab active">
+        <div class="card">
+            <h3 style="margin:0 0 10px 0;">Động Phủ Bế Quan</h3>
+            <button id="b-train" class="btn btn-train" onclick="play('tu')">🧘 VẬN CÔNG TU LUYỆN</button>
+            <button id="b-break" class="btn btn-gold" style="display:none" onclick="play('pha')">🔥 ĐỘT PHÁ CẢNH GIỚI</button>
+        </div>
+    </div>
+
+    <div id="t-di" class="tab">
+        <div class="card">
+            <h3 style="margin:0 0 10px 0; color:#00d2ff;">Vạn Yêu Sơn Mạch</h3>
+            <button class="btn btn-exp" onclick="goAI()" id="b-go">🚶 XUẤT THẾ THÁM HIỂM</button>
+        </div>
+    </div>
+
+    <div id="t-kho" class="tab">
+        <div class="card">
+            <h3 style="margin:0 0 10px 0; color:#2ecc71;">Túi Trữ Vật</h3>
+            <div id="ui-inv">Trống rỗng...</div>
+        </div>
+    </div>
+
+    <div id="t-set" class="tab">
+        <div class="card" style="text-align:left">
+            <h3 style="margin:0 0 10px 0; color:#ff4d4d;">Thiết Lập API</h3>
+            <input type="password" id="api-in" style="width:100%; padding:15px; background:#000; color:#fff; border:1px solid #444; border-radius:8px;" placeholder="Dán mã API vào đây...">
+            <button class="btn btn-gold" onclick="save()">💾 LƯU LINH THẠCH</button>
+        </div>
+    </div>
+
+    <div id="log">
+        <div class="log-entry" style="color:#ffcc00">> Thiên Đạo v14.0 khởi chạy. Ying, con đường nghịch thiên chính thức bắt đầu...</div>
+    </div>
+</main>
+
+<script>
+    let p = JSON.parse(localStorage.getItem('tt_v14')) || { lv:0, caps:["Phàm Cốt 1","Phàm Cốt 5","Phàm Cốt 9","Luyện Khí","Trúc Cơ"], hp:100, mHp:100, exp:0, mExp:100, gold:0, atk:10, def:5, inv:[] };
+    
+    function log(m, color="#bbb") { 
+        const d = document.getElementById('log'); 
+        d.innerHTML = `<div class="log-entry" style="color:${color}">— ${m}</div>` + d.innerHTML; 
+    }
+
+    function tab(id, b) { 
+        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); 
+        document.querySelectorAll('.m-btn').forEach(n=>n.classList.remove('active')); 
+        document.getElementById(id).classList.add('active'); b.classList.add('active'); 
+    }
+
+    function save() { 
+        localStorage.setItem('api_key_v14', document.getElementById('api-in').value.trim()); 
+        log("Cảm ứng được linh khí từ API Key. Đã kết nối!", "#00d2ff"); 
+    }
+
+    function ui() {
+        document.getElementById('ui-lv').innerText = p.caps[p.lv]; 
+        document.getElementById('ui-hp-t').innerText = p.hp+"/"+p.mHp;
+        document.getElementById('ui-hp-b').style.width = (p.hp/p.mHp)*100+"%"; 
+        document.getElementById('ui-ex-t').innerText = p.exp+"/"+p.mExp;
+        document.getElementById('ui-ex-b').style.width = (p.exp/p.mExp)*100+"%";
+        document.getElementById('ui-gold').innerText = p.gold;
+        document.getElementById('ui-atk').innerText = p.atk;
+        document.getElementById('ui-def').innerText = p.def;
+        document.getElementById('b-train').style.display = p.exp >= p.mExp ? 'none' : 'block'; 
+        document.getElementById('b-break').style.display = p.exp >= p.mExp ? 'block' : 'none';
+        document.getElementById('ui-inv').innerHTML = p.inv.length ? p.inv.map(i=>`<div class="item-box"><b>${i.n}</b><span>${i.s}</span></div>`).join('') : "Trống...";
+        localStorage.setItem('tt_v14', JSON.stringify(p));
+    }
+
+    function play(t) {
+        if(t=='tu') { p.exp+=25; log("Ying tĩnh tọa bế quan, vận chuyển đại chu thiên, linh lực trong cơ thể nhộn nhạo tăng tiến.", "#fff"); }
+        if(t=='pha') { 
+            if(Math.random()>0.4){ p.lv++; p.exp=0; p.mExp+=50; p.atk+=10; log("Xung kích cảnh giới thành công! Một luồng khí thế hùng hồn quét sạch bốn phương!", "#ffcc00"); } 
+            else { p.hp-=20; log("Khí huyết nghịch chuyển, đột phá thất bại, Ying bị phản phệ trọng thương!", "#ff4d4d"); } 
+        }
+        ui();
+    }
+
+    async function goAI() {
+        const key = localStorage.getItem('api_key_v14');
+        if(!key) return log("Lỗi: Hãy nạp API Key trong tab Cài Đặt!", "#ff4d4d");
+        const btn = document.getElementById('b-go'); btn.disabled = true; btn.innerText = "ĐANG VIẾT VĂN...";
+
+        let r = Math.random(); 
+        let loai = r < 0.3 ? "XAU" : (r < 0.8 ? "BT" : "TOT");
+        
+        // PROMPT VIẾT VĂN CỰC MẠNH
+        let prompt = `Bạn là đại tác gia truyện tu tiên. Hãy viết 1 câu mô tả ngắn gọn, hào hùng (dưới 20 chữ) về việc tu sĩ Ying ${loai=="XAU"?"bị yêu thú tấn công bất ngờ trong rừng":"nhặt được túi linh thạch của tiền bối để lại"}.`;
+
+        try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemma-3-1b-it:generateContent?key=${key}`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            const data = await res.json();
+            let txt = data.candidates[0].content.parts[0].text.trim();
+
+            if(loai=="XAU") { p.hp-=15; log(`🔴 ${txt} (Mất 15 Máu)`, "#ff4d4d"); }
+            else if(loai=="BT") { p.gold+=40; log(`🟡 ${txt} (Nhận 40 Linh Thạch)`, "#ffcc00"); }
+            else { p.inv.push({n:"Linh Kiếm", s:"+5 Công"}); p.atk+=5; log(`🟣 ${txt} (Nhận Linh Kiếm)`, "#2ecc71"); }
+        } catch(e) {
+            log("Thiên đạo nghẽn mạch, Ying lầm lũi nhặt được 5 linh thạch lẻ.", "#888");
+            p.gold+=5;
+        }
+        btn.disabled = false; btn.innerText = "🚶 XUẤT THẾ THÁM HIỂM"; ui();
+    }
+    window.onload = () => { if(localStorage.getItem('api_key_v14')) document.getElementById('api-in').value = localStorage.getItem('api_key_v14'); ui(); };
+</script>
+</body>
+</html>

@@ -3,203 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ying - Tu Tiên Simulator V19</title>
+    <title>Ying Engine V20 - Thần Cơ Diệu Toán</title>
     <style>
         :root {
             --vang: #ffcc00; --do: #ff4d4d; --xanh-linh: #00d2ff; --xanh-the: #2ecc71;
-            --nen: #0a0a0a; --the: #161618; --vien: #2a2a2a; --chu: #dcdcdc;
+            --nen: #080808; --the: #121214; --vien: #252525; --chu: #e0e0e0;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { 
-            margin: 0; background: var(--nen); color: var(--chu); 
-            font-family: 'Segoe UI', sans-serif; height: 100vh; 
-            display: flex; flex-direction: column; overflow: hidden;
-        }
+        body { margin: 0; background: var(--nen); color: var(--chu); font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* --- 1. PHẦN ĐẦU (PROFILE) --- */
-        .profile-sec { padding: 15px; background: linear-gradient(to bottom, #111, #0a0a0a); border-bottom: 1px solid var(--vien); }
-        .p-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-        .p-avatar { width: 50px; height: 50px; background: #222; border-radius: 50%; border: 2px solid var(--vang); display: flex; align-items: center; justify-content: center; font-size: 24px; }
-        .p-info { flex-grow: 1; padding-left: 15px; }
-        .p-name { font-weight: bold; color: var(--vang); font-size: 18px; }
-        .p-title { font-size: 12px; color: #888; }
-        .p-currency { font-size: 13px; font-weight: bold; }
+        /* --- UI HEADER (Ảnh 168) --- */
+        .header { padding: 15px; background: #000; border-bottom: 2px solid var(--vang); flex-shrink: 0; }
+        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .p-name { font-weight: bold; color: var(--vang); font-size: 16px; text-shadow: 0 0 5px rgba(255,204,0,0.3); }
+        .combat-pwr { color: #ff8800; font-size: 13px; font-weight: bold; }
+        
+        .stat-group { margin-bottom: 5px; }
+        .stat-info { display: flex; justify-content: space-between; font-size: 10px; color: #888; margin-bottom: 2px; }
+        .bar-bg { width: 100%; height: 6px; background: #1a1a1a; border-radius: 3px; overflow: hidden; border: 0.5px solid #333; }
+        .bar-fill { height: 100%; width: 0%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        /* --- 2. CẢNH GIỚI & LỰC CHIẾN --- */
-        .realm-sec { padding: 10px 15px; background: #111; display: flex; justify-content: space-between; align-items: center; }
-        .realm-text { font-size: 16px; font-weight: bold; }
-        .combat-power { color: #ff8800; font-weight: bold; font-size: 14px; }
-        .break-btn { background: linear-gradient(to right, #800, #f00); border: none; padding: 5px 15px; border-radius: 5px; color: #fff; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 0 0 10px rgba(255,0,0,0.5); }
+        /* --- NAVIGATION --- */
+        .nav { display: flex; background: #111; overflow-x: auto; flex-shrink: 0; border-bottom: 1px solid var(--vien); }
+        .nav-item { flex: 1; padding: 15px 5px; border: none; background: none; color: #555; font-size: 10px; font-weight: bold; white-space: nowrap; cursor: pointer; border-bottom: 2px solid transparent; }
+        .nav-item.active { color: var(--vang); border-bottom-color: var(--vang); background: #161618; }
 
-        /* --- 3. THANH CHỈ SỐ (3 MÀU) --- */
-        .stats-sec { padding: 10px 15px; background: var(--the); margin: 5px 15px; border-radius: 10px; border: 1px solid var(--vien); }
-        .stat-row { display: flex; align-items: center; margin: 8px 0; font-size: 11px; }
-        .stat-label { width: 80px; }
-        .bar-bg { flex-grow: 1; height: 8px; background: #000; border-radius: 4px; overflow: hidden; border: 1px solid #333; }
-        .bar-fill { height: 100%; transition: 0.4s; }
+        /* --- CONTENT AREA --- */
+        .viewport { flex-grow: 1; padding: 15px; overflow-y: auto; position: relative; }
+        .view-tab { display: none; animation: fadeIn 0.3s ease; }
+        .view-tab.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- 4. HỆ THỐNG NÚT BẤM (GRID 2x4) --- */
-        .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 10px 15px; }
-        .menu-item { 
-            background: #222; border: 1px solid #333; padding: 12px 0; 
-            border-radius: 8px; text-align: center; font-size: 10px; 
-            font-weight: bold; color: #aaa; cursor: pointer;
-        }
-        .menu-item.active { background: #332a00; border-color: var(--vang); color: var(--vang); }
+        /* --- CARDS & LISTS --- */
+        .card { background: var(--the); border: 1px solid var(--vien); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .map-node { background: #1a1a1a; padding: 12px; border-radius: 8px; border: 1px solid #333; text-align: center; cursor: pointer; }
+        .map-node:active { background: #222; border-color: var(--vang); }
 
-        /* --- 5. KHU VỰC BẢN ĐỒ / THÁM HIỂM --- */
-        .world-sec { flex-grow: 1; overflow-y: auto; padding: 0 15px; }
-        .area-label { font-size: 12px; color: var(--vang); padding: 10px 0; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
-        .map-card-list { display: flex; gap: 10px; padding: 10px 0; overflow-x: auto; }
-        .map-card { 
-            min-width: 140px; background: #1a1a1a; border-radius: 10px; 
-            padding: 15px; border: 1px solid #333; text-align: center;
-        }
-        .map-card h4 { margin: 0 0 10px 0; font-size: 14px; }
-        .map-cost { font-size: 11px; color: #888; margin-bottom: 10px; }
-        .btn-go { width: 100%; background: #333; border: 1px solid #444; color: #fff; padding: 5px; border-radius: 5px; font-size: 10px; }
+        /* --- JOURNAL (LOG) --- */
+        .journal { background: #000; border: 1px solid var(--vien); border-radius: 10px; height: 160px; overflow-y: auto; padding: 10px; font-size: 12px; font-family: 'Courier New', monospace; line-height: 1.4; color: #999; }
+        .log-time { color: #555; margin-right: 5px; }
 
-        /* --- 6. NHẬT KÝ TU TIÊN --- */
-        .journal-sec { height: 180px; background: #000; border-top: 1px solid var(--vien); display: flex; flex-direction: column; }
-        .journal-header { padding: 5px 15px; font-size: 11px; color: #666; display: flex; justify-content: space-between; border-bottom: 1px solid #111; }
-        .journal-content { flex-grow: 1; overflow-y: auto; padding: 10px 15px; font-size: 12px; color: #888; font-family: monospace; }
-        .log-line { margin-bottom: 5px; }
+        /* --- MODAL SYSTEM --- */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-box { background: #1a1a1c; border: 1px solid var(--vang); border-radius: 20px; padding: 25px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 30px rgba(255,204,0,0.1); }
+        .btn-modal { width: 100%; padding: 15px; margin-top: 10px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
-        /* --- 7. NÚT NỔI (FLOATING) --- */
-        .fab { position: fixed; bottom: 200px; right: 20px; width: 45px; height: 45px; background: #886600; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 0 15px rgba(0,0,0,0.5); border: 2px solid var(--vang); }
-
-        /* --- 8. MODAL / OVERLAY --- */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .modal-box { background: #1a1a1c; border: 1px solid var(--vang); border-radius: 15px; width: 100%; max-width: 360px; padding: 25px; text-align: center; }
+        /* --- UTILS --- */
+        .btn-gold { background: var(--vang); color: #000; }
+        .btn-dark { background: #333; color: #fff; }
     </style>
 </head>
 <body>
 
-<div class="profile-sec">
-    <div class="p-top">
-        <div class="p-avatar">🤠</div>
-        <div class="p-info">
-            <div class="p-name">Đạo Hữu <span style="font-size:12px; color:#666">[Vô Danh Tiểu Tốt]</span></div>
-            <div class="p-title">Phàm Cốt</div>
+<header>
+    <div class="row">
+        <div class="p-name">🤠 Ying <span id="ui-title" style="font-size:10px; color:#666">[Phàm Cốt]</span></div>
+        <div id="ui-gold" style="font-weight:bold; color:var(--vang)">💎 10K</div>
+    </div>
+    <div class="row">
+        <div id="ui-realm" style="font-size:14px; font-weight:bold;">Luyện Khí Tầng 1</div>
+        <div class="combat-pwr">Lực chiến: 8.5K</div>
+    </div>
+    
+    <div class="stat-group">
+        <div class="stat-info"><span>Sinh lực</span><span id="txt-hp">100/100</span></div>
+        <div class="bar-bg"><div id="bar-hp" class="bar-fill" style="background:var(--do)"></div></div>
+    </div>
+    <div class="stat-group">
+        <div class="stat-info"><span>Linh lực</span><span id="txt-mp">0/100</span></div>
+        <div class="bar-bg"><div id="bar-mp" class="bar-fill" style="background:var(--xanh-linh)"></div></div>
+    </div>
+    <div class="stat-group">
+        <div class="stat-info"><span>Thể lực</span><span id="txt-st">100/100</span></div>
+        <div class="bar-bg"><div id="bar-st" class="bar-fill" style="background:var(--xanh-the)"></div></div>
+    </div>
+</header>
+
+<nav id="navbar">
+    <button class="nav-item active" onclick="Engine.tab('world', this)">BẢN ĐỒ</button>
+    <button class="nav-item" onclick="Engine.tab('sect', this)">MÔN PHÁI</button>
+    <button class="nav-item" onclick="Engine.tab('inv', this)">TÚI ĐỒ</button>
+    <button class="nav-item" onclick="Engine.tab('set', this)">CÀI ĐẶT</button>
+</nav>
+
+<div class="viewport">
+    <div id="view-world" class="view-tab active">
+        <div class="card">
+            <h4 style="margin:0 0 10px 0; color:var(--vang)">🗺️ KHU VỰC 1: PHÀM GIỚI</h4>
+            <div class="map-grid">
+                <div class="map-node" onclick="Engine.explore('U Minh Động', 10)">
+                    <b>U Minh Động</b><br><small>⚡ 10 | ⏳ 3s</small>
+                </div>
+                <div class="map-node" onclick="Engine.explore('Vạn Kiếp Sơn', 20)">
+                    <b>Vạn Kiếp Sơn</b><br><small>⚡ 20 | ⏳ 5s</small>
+                </div>
+            </div>
         </div>
-        <div class="p-currency">💎 <span id="val-gold">10K</span></div>
+        <div class="journal" id="log-box"></div>
     </div>
-</div>
 
-<div class="realm-sec">
-    <div>
-        <div class="realm-text">Cảnh giới: <span style="color:#fff">Luyện Khí Tầng 1</span></div>
-        <div style="font-size:10px; color:#666">Linh khí: 300/200 <span style="color:var(--vang)">(100%)</span></div>
-    </div>
-    <div style="text-align:right">
-        <div class="combat-power">Lực chiến: 8K</div>
-        <button class="break-btn">ĐỘT PHÁ!</button>
-    </div>
-</div>
-
-<div class="stats-sec">
-    <div class="stat-row">
-        <span class="stat-label">🍎 Sinh lực:</span>
-        <div class="bar-bg"><div id="bar-hp" class="bar-fill" style="width:100%; background:var(--do)"></div></div>
-        <span style="width:60px; text-align:right; margin-left:10px">2.9K/2.9K</span>
-    </div>
-    <div class="stat-row">
-        <span class="stat-label">🔷 Linh lực:</span>
-        <div class="bar-bg"><div id="bar-mp" class="bar-fill" style="width:50%; background:var(--xanh-linh)"></div></div>
-        <span style="width:60px; text-align:right; margin-left:10px">555/555</span>
-    </div>
-    <div class="stat-row">
-        <span class="stat-label">⚡ Thể lực:</span>
-        <div class="bar-bg"><div id="bar-st" class="bar-fill" style="width:80%; background:var(--xanh-the)"></div></div>
-        <span style="width:60px; text-align:right; margin-left:10px">165/165</span>
-    </div>
-</div>
-
-<div class="menu-grid">
-    <div class="menu-item">TU LUYỆN</div>
-    <div class="menu-item">MÔN PHÁI</div>
-    <div class="menu-item">LINH THÚ</div>
-    <div class="menu-item">NHIỆM VỤ</div>
-    <div class="menu-item active">BẢN ĐỒ</div>
-    <div class="menu-item">TÚI ĐỒ</div>
-    <div class="menu-item">THẦN THÔNG</div>
-    <div class="menu-item">CÀI ĐẶT</div>
-</div>
-
-<div class="world-sec">
-    <div class="area-label">🗺️ KHU VỰC 1: PHÀM GIỚI <span>▲</span></div>
-    <div class="map-card-list">
-        <div class="map-card">
-            <h4>U Minh Động</h4>
-            <div class="map-cost">⚡ 10 | ⌛ 10s</div>
-            <button class="btn-go" onclick="Game.startExplore('U Minh Động')">Thăm dò: 0/10</button>
+    <div id="view-sect" class="view-tab">
+        <div class="card">
+            <h3 style="color:var(--vang)">Thiếu Lâm Tự</h3>
+            <p style="font-size:12px; color:#888">Nơi rèn luyện căn cốt thép, bậc thầy phòng ngự.</p>
+            <button class="btn-modal btn-gold" onclick="Engine.log('Cảnh giới chưa đủ để gia nhập!')">GIA NHẬP</button>
         </div>
-        <div class="map-card" style="border-color:#554400">
-            <h4 style="color:var(--vang)">Vạn Kiếp Sơn</h4>
-            <div class="map-cost">⚡ 20 | ⌛ 20s</div>
-            <button class="btn-go">Thăm dò: 0/10</button>
-        </div>
-        <div class="map-card" style="border-color:#440000">
-            <h4 style="color:var(--do)">Huyết Ma...</h4>
-            <div class="map-cost">⚡ 40 | ⌛ 40s</div>
-            <button class="btn-go">Thăm dò: 0/10</button>
+    </div>
+
+    <div id="view-inv" class="view-tab">
+        <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:5px;" id="inv-grid">
+            </div>
+    </div>
+
+    <div id="view-set" class="view-tab">
+        <div class="card">
+            <label style="font-size:12px; color:#666">API Key (Gemini):</label>
+            <input type="password" id="api-key" style="width:100%; padding:12px; background:#000; color:#fff; border:1px solid #333; border-radius:8px; margin-top:5px;">
+            <button class="btn-modal btn-gold" onclick="Engine.saveKey()">LƯU THẦN THỨC</button>
         </div>
     </div>
 </div>
 
-<div class="journal-sec">
-    <div class="journal-header">
-        <span>📜 Nhật ký tu tiên</span>
-        <div><button style="font-size:9px; background:#222; color:#eee; border:none;">XEM HẾT</button> <button style="font-size:9px; background:#222; color:#eee; border:none;">XÓA</button></div>
-    </div>
-    <div class="journal-content" id="journal-log">
-        <div class="log-line"><span style="color:#666">[13:21:53]</span> <span style="color:var(--vang)">Hệ thống: Đã ghi lại thần thức (Save)! x 51</span></div>
-        <div class="log-line"><span style="color:#666">[13:21:53]</span> ⚔️ Đã trang bị <b>Giáp Da</b>.</div>
-        <div class="log-line"><span style="color:#666">[13:21:27]</span> ⚔️ Đã trang bị <b>Mặt Nạ Vô Diện</b>.</div>
-    </div>
-</div>
-
-<div class="fab">⚒️</div>
-
-<div class="overlay" id="event-modal">
+<div class="modal" id="modal">
     <div class="modal-box">
-        <h3 id="modal-title" style="color:var(--vang)">KỲ NGỘ</h3>
-        <p id="modal-text">Đang kết nối thiên đạo...</p>
-        <button class="break-btn" style="width:100%; margin-top:20px" onclick="Game.closeModal()">XÁC NHẬN</button>
+        <h3 id="modal-title" style="color:var(--vang); margin-top:0;">THÔNG BÁO</h3>
+        <div id="modal-content" style="font-size:14px; line-height:1.6; color:#ccc; margin-bottom:20px;"></div>
+        <button class="btn-modal btn-gold" onclick="Engine.closeModal()">XÁC NHẬN</button>
     </div>
 </div>
 
 <script>
-    /* MASTER ENGINE V19 */
-    const Game = {
-        state: { hp: 2900, mp: 555, st: 165, gold: 10000 },
+/* ==========================================================
+   ENGINE V20: THẦN CƠ DIỆU TOÁN
+   ========================================================== */
+const Engine = {
+    // 1. DỮ LIỆU NHÂN VẬT
+    player: JSON.parse(localStorage.getItem('ying_v20_save')) || {
+        lv: 1, exp: 0, mExp: 100, 
+        hp: 100, mHp: 100, 
+        st: 100, mSt: 100, 
+        gold: 10000, atk: 8500, inv: []
+    },
 
-        log: function(msg, color = "#888") {
-            const logDiv = document.getElementById('journal-log');
-            const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
-            logDiv.innerHTML = `<div class="log-line"><span style="color:#666">[${time}]</span> ${msg}</div>` + logDiv.innerHTML;
-        },
+    // 2. HỆ THỐNG LOG NHẬT KÝ
+    log: function(msg, color = "#999") {
+        const box = document.getElementById('log-box');
+        const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+        box.innerHTML = `<div style="margin-bottom:5px; color:${color}"><span class="log-time">[${time}]</span> ${msg}</div>` + box.innerHTML;
+    },
 
-        startExplore: function(name) {
-            this.log(`Bắt đầu thám hiểm <b>${name}</b>...`, "var(--xanh-linh)");
-            // Logic gọi AI hoặc trừ thể lực sẽ thêm ở đây
-            setTimeout(() => {
-                this.showModal("KẾT QUẢ THÁM HIỂM", `Bạn đã hoàn thành thám hiểm ${name} và nhận được 50 Linh thạch.`);
-            }, 1000);
-        },
+    // 3. THAO TÁC TAB
+    tab: function(id, btn) {
+        document.querySelectorAll('.view-tab').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+        document.getElementById('view-' + id).classList.add('active');
+        btn.classList.add('active');
+        if(id === 'inv') this.renderInv();
+    },
 
-        showModal: function(title, text) {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-text').innerText = text;
-            document.getElementById('event-modal').style.display = 'flex';
-        },
+    // 4. HỆ THỐNG THÁM HIỂM (OPERABLE)
+    explore: async function(name, cost) {
+        if(this.player.st < cost) return this.log("Thể lực không đủ, hãy nghỉ ngơi!", "#ff4d4d");
 
-        closeModal: function() {
-            document.getElementById('event-modal').style.display = 'none';
+        this.player.st -= cost;
+        this.log(`Bắt đầu thám hiểm <b>${name}</b>...`, var(--xanh-linh));
+        this.updateUI();
+
+        // Giả lập thời gian chờ (⏳)
+        const key = localStorage.getItem('ying_v20_api');
+        let story = `Bạn đã thám hiểm ${name} và tìm thấy một vài linh thạch vụn.`;
+
+        if(key) {
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemma-3-1b-it:generateContent?key=${key}`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ contents: [{ parts: [{ text: `Viết 1 câu ngắn về tu sĩ Ying thám hiểm ${name} gặp kỳ ngộ.` }] }] })
+                });
+                const data = await res.json();
+                story = data.candidates[0].content.parts[0].text.trim();
+            } catch(e) {}
         }
-    };
-</script>
 
+        setTimeout(() => {
+            this.player.exp += 20;
+            this.player.gold += 50;
+            this.openModal("KẾT QUẢ THÁM HIỂM", story);
+            this.log(`Thám hiểm hoàn tất. Nhận 20 Linh lực & 50 Linh thạch.`, var(--vang));
+            this.checkLevel();
+            this.updateUI();
+        }, 2000);
+    },
+
+    // 5. CẬP NHẬT GIAO DIỆN
+    updateUI: function() {
+        document.getElementById('ui-realm').innerText = `Luyện Khí Tầng ${this.player.lv}`;
+        document.getElementById('ui-gold').innerText = `💎 ${this.player.gold.toLocaleString()}`;
+        
+        // Cập nhật các thanh chỉ số
+        this.setBar('hp', this.player.hp, this.player.mHp);
+        this.setBar('mp', this.player.exp, this.player.mExp);
+        this.setBar('st', this.player.st, this.player.mSt);
+
+        localStorage.setItem('ying_v20_save', JSON.stringify(this.player));
+    },
+
+    setBar: function(id, val, max) {
+        document.getElementById(`txt-${id}`).innerText = `${val}/${max}`;
+        document.getElementById(`bar-${id}`).style.width = (val / max) * 100 + "%";
+    },
+
+    // 6. MODAL & SETTINGS
+    openModal: function(title, content) {
+        document.getElementById('modal-title').innerText = title;
+        document.getElementById('modal-content').innerText = content;
+        document.getElementById('modal').style.display = 'flex';
+    },
+    closeModal: function() { document.getElementById('modal').style.display = 'none'; },
+
+    saveKey: function() {
+        const k = document.getElementById('api-key').value.trim();
+        localStorage.setItem('ying_v20_api', k);
+        this.log("Đã nạp Thần Thức (API Key) thành công!", var(--xanh-linh));
+    },
+
+    renderInv: function() {
+        const grid = document.getElementById('inv-grid');
+        grid.innerHTML = "";
+        for(let i=0; i<25; i++) {
+            grid.innerHTML += `<div style="aspect-ratio:1/1; background:#1a1a1a; border:1px solid #333; border-radius:5px;"></div>`;
+        }
+    },
+
+    checkLevel: function() {
+        if(this.player.exp >= this.player.mExp) {
+            this.player.lv++; this.player.exp = 0; this.player.mExp += 50;
+            this.openModal("ĐỘT PHÁ!", "Chúc mừng đạo hữu đã thăng cấp cảnh giới!");
+        }
+    }
+};
+
+window.onload = () => {
+    Engine.updateUI();
+    const k = localStorage.getItem('ying_v20_api');
+    if(k) document.getElementById('api-key').value = k;
+    Engine.log("Thiên Đạo V20 khởi chạy thành công.");
+};
+</script>
 </body>
 </html>
